@@ -12,7 +12,7 @@ template.add_to_builtins('django.contrib.staticfiles.templatetags.staticfiles')
 
 urlpatterns = patterns('',
                        url(r'^', include('cogpheno.apps.main.urls')),
-                       #url(r'^', include('cogpheno.apps.assessments.urls')),
+                       url(r'^', include('cogpheno.apps.assessments.urls')),
                        url(r'^admin/', include(admin.site.urls)))
 
 if settings.DEBUG:

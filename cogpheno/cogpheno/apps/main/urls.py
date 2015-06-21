@@ -5,6 +5,5 @@ from .views import index_view
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', index_view,
-        name="index"),
+    url(r'^$', index_view, name="index"),
 )
