@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'cogpheno.apps.main',
     'cogpheno.apps.assessments',
+    'crispy_forms',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -108,3 +109,5 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'

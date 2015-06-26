@@ -1,13 +1,47 @@
+from django.db.models import Q, DO_NOTHING
+from django.core.urlresolvers import reverse
 from django.db import models
+
+class CognitiveAtlasTask(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    cog_atlas_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
+    
+    def __str__(self):
+        return self.name
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+class CognitiveAtlasConcept(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    cog_atlas_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
+    definition = models.CharField(max_length=200, null=False, blank=False,default=None)
+    
+    def __str__(self):
+        return self.name
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
 
 
 # A behavioral assessment contains questions
 class Assessment(models.Model):
     name = models.CharField(max_length=250)
     pub_date = models.DateTimeField('date published')
-    cognitive_atlas_task = models.CharField(help_text="Link to <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a> task", verbose_name="Cognitive Atlas task", max_length=200, null=True, blank=True)
+    cognitive_atlas_task = models.ForeignKey(CognitiveAtlasTask, help_text="Assessment defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Task", null=True, blank=False, on_delete=DO_NOTHING)
     abbreviation = models.CharField(max_length=250,help_text="Assessment abbreviation")
     version = models.CharField(max_length=10,help_text="version")
+
+    # Get the url for an assessment
+    def get_absolute_url(self):
+        return_cid = self.id
+        return reverse('assessment_details', args=[str(return_cid)])
 
 # Questions belong to assessments
 class Question(models.Model):
@@ -20,6 +54,7 @@ class Question(models.Model):
     )
 
     assessment = models.ForeignKey(Assessment)
+    cognitive_atlas_concept = models.ForeignKey(CognitiveAtlasConcept, help_text="Concept defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Concept", null=True, blank=False, on_delete=DO_NOTHING)
     text = models.CharField(max_length=500)
     label = models.CharField(max_length=250,help_text="question unique label",unique=True)
     required = models.BooleanField(choices=((False, 'Not required'),
@@ -32,6 +67,12 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text    
+
+
+    # Get the url for a question
+    def get_absolute_url(self):
+        return_cid = self.id
+        return reverse('question_details', args=[str(return_cid)])
 
 
 # Question Options belong to questions
@@ -59,7 +100,6 @@ class Concept(models.Model):
 
     def __str__(self):
         return self.cogitive_atlas_id
-
 
 # In future, possibly add an instantiation of an assessment 
 # (pointing to an entire assessment, and an answer for each question)
