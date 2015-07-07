@@ -6,6 +6,9 @@ from cogpheno.apps.assessments.models import Assessment, Question
 from django.http import HttpResponse
 from django.shortcuts import render
 import json
+import csv
+
+#### GETS #############################################################
 
 # get assessment
 def get_assessment(aid,request,mode=None):
@@ -28,6 +31,48 @@ def get_question(qid,request,mode=None):
     else:
         return question
 
+
+#### VIEWS #############################################################
+
+# View a single assessment
+def view_assessment(request, aid):
+    assessment = get_assessment(aid,request)
+    questions = assessment.question_set.all()
+    context = {'assessment': assessment,
+            'questions': questions,
+            'aid':aid,
+            'active':'assessments'}
+
+    return render_to_response('assessment_details.html', context)
+
+# View a single question
+def view_question(request, qid):
+    question = get_question(qid,request)
+    context = {'question': question,
+               'qid':qid,
+               'active':'questions'}
+
+    return render_to_response('question_details.html', context)
+
+
+# All assessments
+def assessments_view(request):
+    assessments = Assessment.objects.all()
+    counts = [ assessment.question_set.count() for assessment in assessments ]
+    context = {'assessments': assessments,
+               'active' : 'assessments' }
+    return render(request, 'all_assessments.html', context)
+
+
+# All questions
+def questions_view(request):
+    questions = Question.objects.all()
+    context = {'questions': questions,
+               'active':'questions'}
+    return render(request, 'all_questions.html', context)
+
+
+#### EDIT/ADD/DELETE #############################################################
 
 # Add assessment
 def edit_assessment(request,aid=None):
@@ -77,44 +122,15 @@ def edit_question(request,qid=None):
 
             context = {
                 'question': question,
-                "active":"questions"
+                "active":"questions",
+                "page_header":page_header
             }
             return HttpResponseRedirect(question.get_absolute_url())
     else:
         form = QuestionForm(instance=question)
 
-    context = {"form": form, "page_header": page_header}
+    context = {"form": form, "page_header": page_header,"active":"questions"}
     return render(request, "edit_question.html", context)
-
-
-# View a single assessment
-def view_assessment(request, aid):
-    assessment = get_assessment(aid,request)
-    questions = assessment.question_set.all()
-    context = {'assessment': assessment,
-            'questions': questions,
-            'aid':aid,
-            'active':'assessments'}
-
-    return render_to_response('assessment_details.html', context)
-
-# View a single question
-def view_question(request, qid):
-    question = get_question(qid,request)
-    context = {'question': question,
-               'qid':qid,
-               'active':'questions'}
-
-    return render_to_response('question_details.html', context)
-
-
-# All assessments
-def assessments_view(request):
-    assessments = Assessment.objects.all()
-    counts = [ assessment.question_set.count() for assessment in assessments ]
-    context = {'assessments': assessments,
-               'active' : 'assessments' }
-    return render(request, 'all_assessments.html', context)
 
 # Delete an assessment
 def delete_assessment(request, aid):
@@ -130,14 +146,6 @@ def delete_question(request, qid):
     return redirect('questions')
 
 
-# All questions
-def questions_view(request):
-    questions = Question.objects.all()
-    context = {'questions': questions,
-               'active':'questions'}
-    return render(request, 'all_questions.html', context)
-
-
 # Edit all questions view
 def edit_questions(request, assessment_aid):
     from cogpheno.apps.assessments.models import CognitiveAtlasConcept, Question
@@ -150,8 +158,6 @@ def edit_questions(request, assessment_aid):
 
     # Update questions on post
     if request.method == "POST":
-        import pickle
-        pickle.dump(request.POST,open("/home/vanessa/Desktop/test.pkl","wb"))
         
         data = request.POST.lists()
         content = request.POST.keys()
@@ -174,7 +180,6 @@ def edit_questions(request, assessment_aid):
                                           data_type=new_question["data_type"],
                                           required=bool(new_question["required"]),
                                           cognitive_atlas_concept=concept)
-
         
     else:
         message=""
@@ -192,3 +197,53 @@ def edit_questions(request, assessment_aid):
 def get_questions(assessment):
     return assessment.question_set.all()
 
+
+#### EXPORT #############################################################
+
+# Export all questions for a single assessment
+def export_assessment(request,aid):
+    assessment = get_assessment(aid,request)
+    output_name = "%s_%s.tsv" %(assessment.name.replace(" ","_"),len(assessment.question_set.all()))
+    return export_assessments([assessment],output_name)
+   
+# Export all assessment questions
+def export_questions(request):
+    assessments = Assessment.objects.all()
+    count = Question.objects.count()
+    output_name = "cogPheno_%s.tsv" %(count)
+    return export_assessments(assessments,output_name) 
+
+# General function to export some number of assessments
+def export_assessments(assessments,output_name):
+
+    response = HttpResponse(content_type='text/csv')
+
+    response['Content-Disposition'] = 'attachment; filename="%s"' %(output_name)
+
+    writer = csv.writer(response,delimiter='\t')
+    # Write header 
+    writer.writerow(['assessment_name',
+                     'assessment_number_questions',
+                     'assessment_version',
+                     'assessment_pubdate',
+                     'question_label', 
+                     'question_text',
+                     'question_cognitive_atlas_concept',
+                     'question_id',
+                     'question_datatype',
+                     'question_required'])
+
+    for assessment in assessments:
+        for question in assessment.question_set.all():
+            writer.writerow([assessment.name,
+                         len(assessment.question_set.all()),
+                         assessment.version,
+                         str(assessment.pub_date),
+                         question.label,
+                         question.text,
+                         question.cognitive_atlas_concept,
+                         question.id,
+                         question.data_type,
+                         question.required])
+
+    return response

@@ -9,25 +9,19 @@
           <th>Label</th>
           <th>Question Text</th>
           <th>Cognitive Atlas Concept</th>
-          <th>Definition</th>
           <th>Required</th>
           <th>Data Type</th>
-          <th>Edit</th>
         </tr>
       </thead>
       <tbody>
         {% for question in questions %}
           <tr>
-            <td>{{ question.assessment }}</td>
+            <td><a href='{% url 'edit_question' question.id %}' id="edit_question">{{ question.label }}</a></td>
             <td>{{ question.label }}</td>
             <td>{{ question.text }}</td>
             <td>{{ question.cognitive_atlas_concept }}</td>
-            <td>{{ question.definition }}</td>
             <td>{{ question.required }}</td>
             <td>{{ question.data_type }}</td>
-            <td class="col-md-1"><button class="btn btn-success btn-small">+</button>
-                <button class="btn btn-danger btn-small">-</button>
-            </td>
           </tr>
         {% endfor %}
       </tbody>

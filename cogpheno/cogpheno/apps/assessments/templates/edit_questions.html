@@ -32,24 +32,30 @@
 </div>
 <div class="row">
     <div class="col-md-10">
-        <a class="btn btn-primary pull-right btn-save-metadata">Save</a>
+        <a href="/assessments/{{ assessment.id }}/export" class="btn btn-primary pull-right" style="margin-left:5px">Export</a>
+        <a class="btn btn-primary pull-right">Save</a>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-10">
         <div class="alert alert-error errors">
         {% if mess %}
-          {{ mess }}
+           <div>{{ mess }}</div>
         {% endif %}
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-4">
        <div class="search">
-           <input id="search" type="text" class="form-control input-sm" placeholder="Search...">
+           <input id="search" type="text" class="form-control input-sm" placeholder="Search..." style="margin-bottom:15px">
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-10">
         <div id="hott" class="handsontable"></div>
     </div>
 </div>
