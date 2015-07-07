@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.15.1/handsontable.full.js" type="text/javascript"></script>
+<link rel="stylesheet" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.15.1/handsontable.full.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<style>
+    .errors {
+        display: none;
+    }
+
+    .btn-save-metadata {
+        margin-bottom: 20px;
+    }
+
+    #hot {
+        overflow: auto;
+    }
+
+.htCore td.customClass {
+  color: #f8f8ff;
+  background: #1abc9c;
+}
+</style>
+
+{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-md-9">
+		<h2><a href="{{assessment.get_absolute_url}}">{{ assessment.name }}</a> / Edit&nbsp;Questions</h2>
+	</div>
+	<div class="col-md-10"><hr/></div>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <a class="btn btn-primary pull-right btn-save-metadata">Save</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <div class="alert alert-error errors">
+        {% if mess %}
+          {{ mess }}
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+       <div class="search">
+           <input id="search" type="text" class="form-control input-sm" placeholder="Search...">
+        </div>
+        <div id="hott" class="handsontable"></div>
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function () {
+
+  var container = document.getElementById('hott');
+    var data = function () {
+    return Handsontable.helper.createSpreadsheetData(500, 12);
+  };
+ 
+  var data = [
+      {% for question in questions %} ["{{ question.id }}","{{ question.label }}","{{ question.text }}","{{ question.cognitive_atlas_concept }}","{{ question.required }}","{{ question.data_type }}"],
+      {% endfor %}
+  ];
+  
+  var hot = new Handsontable(container, {
+    data: data,
+    height: 396,
+    colHeaders: ["Label", "Question Text", "Concept","Required","Data Type"],
+    rowHeaders: true,
+    search: {
+      searchResultClass: 'customClass'
+    },
+    minSpareRows:10,
+    stretchH: 'all',
+    columnSorting: true,
+    contextMenu: true,
+    fillHandle: true, 
+    columns: [
+      {type: 'text',data:1},
+      {type: 'text',data:2},
+      {type: 'autocomplete',
+       source: ["{{ cognitive_atlas_concepts|safe }}"],
+       strict: true,
+       data:3,
+      },
+      {type: 'autocomplete',
+       source: ["True","False"],
+       strict: true,
+       data:4
+      },
+      {type: 'autocomplete',
+       source: ["INT","LONGINT","DATETIME","TEXT"],
+       strict: true,
+       data:5
+      }
+    ]
+  });
+
+    search = document.getElementById('search');
+    Handsontable.Dom.addEvent(search,'keyup', function (event) {
+        var queryResult = hot.search.query(this.value);
+        console.log(queryResult)
+        hot.render();
+    });
+
+
+// Save questions!
+$('.btn-save-metadata').click(function () {
+      var csrftoken = $.cookie('csrftoken');
+
+      console.log(hot.getData())
+      var data, files, i, paths, xhr;
+      paths = "";
+      questions = hot.getData()
+      xhr = new XMLHttpRequest();
+      data = new FormData();
+      for (i in questions) {
+          // Do not add empty rows - a unique ID label is required
+          if (questions[i][1] !== null) {
+          console.log(questions[i])
+          console.log(questions[i][1])
+          data.append('id[]', questions[i][0]);
+          data.append('label[]', questions[i][1]);
+          data.append('text[]', questions[i][2]);
+          data.append('cognitive_atlas_concept[]', questions[i][3]);
+          data.append('required[]', questions[i][4]);
+          data.append('data_type[]', questions[i][5]);
+          }
+      }
+      
+      xhr.open('POST', "edit", false);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.send(data);
+});
+
+window.onbeforeunload = function () {
+   if (window.sheetModified) {
+     return 'You have pending unsaved changes. ' +
+       'Do you really want to discard them ?';
+   }
+};
+
+// displayErrors
+displayErrors = function ($el, errors) {
+    var len = errors.length,
+      i;
+
+    $el.empty();
+
+    for (i = 0; i < len; i += 1) {
+      $el.append('<div>' + errors[i].msg + '</div>');
+    }
+    $el.show();
+};
+
+});
+</script>
+
+{% endblock %}

@@ -1,10 +1,11 @@
 from django.shortcuts import get_object_or_404, render_to_response, render, redirect
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
+from django.core.exceptions import PermissionDenied, ValidationError
 from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm
 from cogpheno.apps.assessments.models import Assessment, Question
 from django.http import HttpResponse
 from django.shortcuts import render
-
+import json
 
 # get assessment
 def get_assessment(aid,request,mode=None):
@@ -31,12 +32,9 @@ def get_question(qid,request,mode=None):
 # Add assessment
 def edit_assessment(request,aid=None):
 
-    page_header = "Add new assessment"
-
     # Editing an existing assessment
     if aid:
         assessment = get_assessment(aid,request)
-        page_header = 'Edit assessment'
     else:
         assessment = Assessment()
 
@@ -54,11 +52,11 @@ def edit_assessment(request,aid=None):
     else:
         form = AssessmentForm(instance=assessment)
 
-    context = {"form": form, "page_header": page_header}
+    context = {"form": form, "active":"assessments"}
     return render(request, "edit_assessment.html", context)
 
 
-# Add question
+# Edit a single question
 def edit_question(request,qid=None):
 
     page_header = "Add new question"
@@ -78,7 +76,8 @@ def edit_question(request,qid=None):
             question.save()
 
             context = {
-                'question': question.name,
+                'question': question,
+                "active":"questions"
             }
             return HttpResponseRedirect(question.get_absolute_url())
     else:
@@ -94,7 +93,8 @@ def view_assessment(request, aid):
     questions = assessment.question_set.all()
     context = {'assessment': assessment,
             'questions': questions,
-            'aid':aid}
+            'aid':aid,
+            'active':'assessments'}
 
     return render_to_response('assessment_details.html', context)
 
@@ -102,7 +102,8 @@ def view_assessment(request, aid):
 def view_question(request, qid):
     question = get_question(qid,request)
     context = {'question': question,
-            'qid':qid}
+               'qid':qid,
+               'active':'questions'}
 
     return render_to_response('question_details.html', context)
 
@@ -111,7 +112,8 @@ def view_question(request, qid):
 def assessments_view(request):
     assessments = Assessment.objects.all()
     counts = [ assessment.question_set.count() for assessment in assessments ]
-    context = {'assessments': assessments }
+    context = {'assessments': assessments,
+               'active' : 'assessments' }
     return render(request, 'all_assessments.html', context)
 
 # Delete an assessment
@@ -121,9 +123,72 @@ def delete_assessment(request, aid):
     return redirect('assessments')
 
 
+# Delete a question
+def delete_question(request, qid):
+    question = get_question(qid,request)
+    question.delete()
+    return redirect('questions')
+
+
 # All questions
 def questions_view(request):
     questions = Question.objects.all()
-    context = {'questions': questions}
+    context = {'questions': questions,
+               'active':'questions'}
     return render(request, 'all_questions.html', context)
+
+
+# Edit all questions view
+def edit_questions(request, assessment_aid):
+    from cogpheno.apps.assessments.models import CognitiveAtlasConcept, Question
+    assessment = get_assessment(assessment_aid, request)
+
+    # Get all cognitive atlas concepts
+    concepts = CognitiveAtlasConcept.objects.all()
+    cognitive_atlas_concepts = [ca.name for ca in concepts]
+    cognitive_atlas_concepts = '","'.join(cognitive_atlas_concepts)
+
+    # Update questions on post
+    if request.method == "POST":
+        import pickle
+        pickle.dump(request.POST,open("/home/vanessa/Desktop/test.pkl","wb"))
+        
+        data = request.POST.lists()
+        content = request.POST.keys()
+        # For each question
+        for n in range(len(data[0][1])):
+            new_question=dict()
+            for i in range(len(content)):
+                label = data[i][0].replace("[]","")
+                value = data[i][1][n]
+                new_question[label] = value
+                # Look up cognitive atlas concept
+                if label == "cognitive_atlas_concept":
+                    try:
+                       concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
+                    except:
+                       concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
+            Question.objects.update_or_create(assessment=assessment, 
+                                          text=new_question["text"],
+                                          label=new_question["label"],
+                                          data_type=new_question["data_type"],
+                                          required=bool(new_question["required"]),
+                                          cognitive_atlas_concept=concept)
+
+        
+    else:
+        message=""
+ 
+    # Retrieve all questions
+    questions = get_questions(assessment)
+
+    return render(request, "edit_questions.html", {
+        'assessment': assessment,
+        'questions': questions,
+        'active':'questions',
+        'cognitive_atlas_concepts':cognitive_atlas_concepts,
+        'mess':message})
+
+def get_questions(assessment):
+    return assessment.question_set.all()
 

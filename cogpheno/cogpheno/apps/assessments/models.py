@@ -38,6 +38,9 @@ class Assessment(models.Model):
     abbreviation = models.CharField(max_length=250,help_text="Assessment abbreviation")
     version = models.CharField(max_length=10,help_text="version")
 
+    def __str__(self):
+        return self.name
+
     # Get the url for an assessment
     def get_absolute_url(self):
         return_cid = self.id
@@ -58,8 +61,8 @@ class Question(models.Model):
     text = models.CharField(max_length=500)
     label = models.CharField(max_length=250,help_text="question unique label",unique=True)
     required = models.BooleanField(choices=((False, 'Not required'),
-                                                     (True, 'Required')),
-                                                      default=True,verbose_name="Required")  
+                                            (True, 'Required')),
+                                            default=True,verbose_name="Required")  
     data_type = models.CharField(
                     help_text=("Data type of the question answer"),
                     verbose_name="Data Type",
@@ -67,7 +70,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text    
-
 
     # Get the url for a question
     def get_absolute_url(self):
@@ -77,7 +79,7 @@ class Question(models.Model):
 
 # Question Options belong to questions
 class QuestionOption(models.Model):
-    question = models.ForeignKey(Question)
+    questions = models.ManyToManyField(Question)
     numerical_score = models.IntegerField()
     text = models.CharField(max_length=250)
 
@@ -87,7 +89,7 @@ class QuestionOption(models.Model):
 
 # We can tag a question with a contrast and/or a concept
 class Contrast(models.Model):
-    question = models.ForeignKey(Question)
+    questions = models.ManyToManyField(Question)
     cognitive_atlas_id = models.CharField(max_length=250,default=None)
 
     def __str__(self):
@@ -95,7 +97,7 @@ class Contrast(models.Model):
 
 
 class Concept(models.Model):
-    question = models.ForeignKey(Question)
+    questions = models.ManyToManyField(Question)
     cognitive_atlas_id = models.CharField(max_length=250,default=None)
 
     def __str__(self):

@@ -16,6 +16,7 @@
     <script src="{% static "js/jquery.dataTables.min.js"%}" type="text/javascript"></script>
     <script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js" type="text/javascript"></script>
     <script src="{% static "js/app.js"%}" type="text/javascript"></script>
+
     {% endblock %}
     {% block head %}{% endblock %}
 	{% block functions %}{% endblock %}
@@ -51,11 +52,19 @@
       <section id='sidebar'>
         <i class='icon-align-justify icon-large' id='toggle'></i>
         <ul id='dock'>
+          {% if active == "home" %}
           <li class='active launcher'>
+          {% else %}
+          <li class='launcher'>
+          {% endif %}
             <i class='fa fa-skyatlas'></i>
             <a href="{% url 'index' %}">Home</a>
           </li>
-          <li class='launcher dropdown hover'>
+          {% if active == "assessments" %}
+          <li class='active launcher dropdown hover'>
+          {% else %}
+          <li class='launcher'>
+          {% endif %}
             <i class="fa fa-book"></i>
             <a href="{% url 'assessments' %}">Assessments</a>
             <ul class='dropdown-menu'>
@@ -68,7 +77,11 @@
               </li>
             </ul>
           </li>
+          {% if active == "questions" %}
+          <li class='active launcher'>
+          {% else %}
           <li class='launcher'>
+          {% endif %}
             <i class="fa fa-question-circle"></i>
             <a href="{% url 'questions' %}">Questions</a>
           </li>
