@@ -33,24 +33,18 @@
 <div class="row">
     <div class="col-md-10">
         <a href="/assessments/{{ assessment.id }}/export" class="btn btn-primary pull-right" style="margin-left:5px">Export</a>
-        <a class="btn btn-primary pull-right">Save</a>
+        <a class="btn btn-primary pull-right btn-save-questions">Save</a>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-10">
-        <div class="alert alert-error errors">
-        {% if mess %}
-           <div>{{ mess }}</div>
-        {% endif %}
-        </div>
-    </div>
-</div>
-
-<div class="row">
+<div class="row" style="margin-top:18px">
     <div class="col-md-4">
        <div class="search">
            <input id="search" type="text" class="form-control input-sm" placeholder="Search..." style="margin-bottom:15px">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div id="response-container" class="alert alert-info hidden" role="alert" style="height:30px;padding-top:4px">
         </div>
     </div>
 </div>
@@ -117,14 +111,24 @@ $(document).ready(function () {
 
 
 // Save questions!
-$('.btn-save-metadata').click(function () {
+$('.btn-save-questions').click(function () {
       var csrftoken = $.cookie('csrftoken');
-
       console.log(hot.getData())
       var data, files, i, paths, xhr;
       paths = "";
       questions = hot.getData()
       xhr = new XMLHttpRequest();
+
+      xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+         if (JSON.parse(xhr.responseText).result == "success"){
+             document.getElementById("response-container").className = "alert alert-success";
+             document.getElementById("response-container").innerHTML = "Questions successfully saved.";
+         }
+         console.log(JSON.parse(xhr.responseText));
+        }
+      } 
+
       data = new FormData();
       for (i in questions) {
           // Do not add empty rows - a unique ID label is required
@@ -142,7 +146,8 @@ $('.btn-save-metadata').click(function () {
       
       xhr.open('POST', "edit", false);
       xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      xhr.send(data);
+      response = xhr.send(data);
+      console.log(response)
 });
 
 window.onbeforeunload = function () {

@@ -3,7 +3,7 @@ from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import PermissionDenied, ValidationError
 from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm
 from cogpheno.apps.assessments.models import Assessment, Question
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import json
 import csv
@@ -147,7 +147,7 @@ def delete_question(request, qid):
 
 
 # Edit all questions view
-def edit_questions(request, assessment_aid):
+def edit_questions(request, assessment_aid, message=1):
     from cogpheno.apps.assessments.models import CognitiveAtlasConcept, Question
     assessment = get_assessment(assessment_aid, request)
 
@@ -159,30 +159,32 @@ def edit_questions(request, assessment_aid):
     # Update questions on post
     if request.method == "POST":
         
-        data = request.POST.lists()
-        content = request.POST.keys()
-        # For each question
-        for n in range(len(data[0][1])):
-            new_question=dict()
-            for i in range(len(content)):
-                label = data[i][0].replace("[]","")
-                value = data[i][1][n]
-                new_question[label] = value
-                # Look up cognitive atlas concept
-                if label == "cognitive_atlas_concept":
-                    try:
-                       concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
-                    except:
-                       concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
-            Question.objects.update_or_create(assessment=assessment, 
+        try:
+            data = request.POST.lists()
+            content = request.POST.keys()
+            # For each question
+            for n in range(len(data[0][1])):
+                new_question=dict()
+                for i in range(len(content)):
+                    label = data[i][0].replace("[]","")
+                    value = data[i][1][n]
+                    new_question[label] = value
+                    # Look up cognitive atlas concept
+                    if label == "cognitive_atlas_concept":
+                        try:
+                            concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
+                        except:
+                            concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
+                Question.objects.update_or_create(assessment=assessment, 
                                           text=new_question["text"],
                                           label=new_question["label"],
                                           data_type=new_question["data_type"],
                                           required=bool(new_question["required"]),
                                           cognitive_atlas_concept=concept)
-        
-    else:
-        message=""
+            return JsonResponse({"result":"success"})
+        except:
+            return JsonResponse({"result":"error"})
+           
  
     # Retrieve all questions
     questions = get_questions(assessment)
@@ -191,8 +193,7 @@ def edit_questions(request, assessment_aid):
         'assessment': assessment,
         'questions': questions,
         'active':'questions',
-        'cognitive_atlas_concepts':cognitive_atlas_concepts,
-        'mess':message})
+        'cognitive_atlas_concepts':cognitive_atlas_concepts})
 
 def get_questions(assessment):
     return assessment.question_set.all()

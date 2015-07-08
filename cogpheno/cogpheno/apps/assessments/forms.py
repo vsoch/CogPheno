@@ -11,6 +11,7 @@ class AssessmentForm(ModelForm):
 
     class Meta:
         model = Assessment
+        fields = ("name","pub_date","cognitive_atlas_task","abbreviation","version")
 
     def clean(self):
         cleaned_data = super(AssessmentForm, self).clean()
@@ -33,6 +34,7 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Question
+        fields = ("assessment","label","text","cognitive_atlas_concept","required","data_type")
 
     def clean(self):
         cleaned_data = super(QuestionForm, self).clean()
