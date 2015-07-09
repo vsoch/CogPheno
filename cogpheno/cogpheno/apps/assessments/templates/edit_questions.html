@@ -3,6 +3,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.15.1/handsontable.full.js" type="text/javascript"></script>
 <link rel="stylesheet" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.15.1/handsontable.full.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.js"></script>
 <style>
     .errors {
         display: none;
@@ -16,7 +17,13 @@
         overflow: auto;
     }
 
-.htCore td.customClass {
+    .spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+    }
+
+  .htCore td.customClass {
   color: #f8f8ff;
   background: #1abc9c;
 }
@@ -28,10 +35,11 @@
 	<div class="col-md-9">
 		<h2><a href="{{assessment.get_absolute_url}}">{{ assessment.name }}</a> / Edit&nbsp;Questions</h2>
 	</div>
-	<div class="col-md-10"><hr/></div>
+	<div class="col-md-12"><hr/></div>
+        <div id='spinner' class='spinner'></div>
 </div>
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
         <a href="/assessments/{{ assessment.id }}/export" class="btn btn-primary pull-right" style="margin-left:5px">Export</a>
         <a class="btn btn-primary pull-right btn-save-questions">Save</a>
     </div>
@@ -49,7 +57,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
         <div id="hott" class="handsontable"></div>
     </div>
 </div>
@@ -64,40 +72,36 @@ $(document).ready(function () {
   };
  
   var data = [
-      {% for question in questions %} ["{{ question.id }}","{{ question.label }}","{{ question.text }}","{{ question.cognitive_atlas_concept }}","{{ question.required }}","{{ question.data_type }}"],
+      {% for question in questions %} ["{{ question.id|safe }}","{{ question.label|safe }}","{{ question.text|safe }}","{{ question.options | safe }}","{{ question.data_type | safe }}","{{ question.cognitive_atlas_concept|safe}}"],
       {% endfor %}
   ];
   
   var hot = new Handsontable(container, {
     data: data,
     height: 396,
-    colHeaders: ["Label", "Question Text", "Concept","Required","Data Type"],
+    colHeaders: ["Label", "Question Text","Options","Data Type","Concept"],
     rowHeaders: true,
     search: {
       searchResultClass: 'customClass'
     },
     minSpareRows:10,
     stretchH: 'all',
-    columnSorting: true,
     contextMenu: true,
     fillHandle: true, 
+    manualColumnResize: true,
     columns: [
       {type: 'text',data:1},
       {type: 'text',data:2},
+      {type: 'text',data:3},
       {type: 'autocomplete',
-       source: ["{{ cognitive_atlas_concepts|safe }}"],
-       strict: true,
-       data:3,
-      },
-      {type: 'autocomplete',
-       source: ["True","False"],
+       source: ["INT","LONGINT","DATETIME","TEXT","DOUBLE"],
        strict: true,
        data:4
       },
       {type: 'autocomplete',
-       source: ["INT","LONGINT","DATETIME","TEXT"],
+       source: ["{{ cognitive_atlas_concepts|safe }}"],
        strict: true,
-       data:5
+       data:5,
       }
     ]
   });
@@ -110,13 +114,47 @@ $(document).ready(function () {
     });
 
 
+// Define waiting spinner
+var opts = {
+      lines: 11, // The number of lines to draw
+      length: 15, // The length of each line
+      width: 10, // The line thickness
+      radius: 30, // The radius of the inner circle
+      corners: 1, // Corner roundness (0..1)
+      rotate: 0, // The rotation offset
+      direction: 1, // 1: clockwise, -1: counterclockwise
+      color: '#000', // #rgb or #rrggbb
+      speed: 0.6, // Rounds per second
+      trail: 60, // Afterglow percentage
+      shadow: false, // Whether to render a shadow
+      hwaccel: false, // Whether to use hardware acceleration
+      className: 'spinner', // The CSS class to assign to the spinner
+      zIndex: 2e9, // The z-index (defaults to 2000000000)
+      top: 'auto', // Top position relative to parent in px
+      left: 'auto' // Left position relative to parent in px
+};
+
+var spinner = new Spinner(opts);
+var spinner_div = 0;
+
+// STOPPED HERE - MAKING A SPINNER
+
 // Save questions!
 $('.btn-save-questions').click(function () {
+
+      // Start the spinner
+      spinner_div = $('#spinner').get(0);
+      spinner.spin(spinner_div);
+     
       var csrftoken = $.cookie('csrftoken');
-      console.log(hot.getData())
-      var data, files, i, paths, xhr;
-      paths = "";
-      questions = hot.getData()
+      var data, i, xhr;
+      var questions = hot.getData()
+      var cleanedQuestions = {};
+
+      $.each(questions, function(rowKey, object) {
+         if (!hot.isEmptyRow(rowKey)) cleanedQuestions[rowKey] = object;
+      });
+
       xhr = new XMLHttpRequest();
 
       xhr.onreadystatechange = function() {
@@ -124,30 +162,32 @@ $('.btn-save-questions').click(function () {
          if (JSON.parse(xhr.responseText).result == "success"){
              document.getElementById("response-container").className = "alert alert-success";
              document.getElementById("response-container").innerHTML = "Questions successfully saved.";
+         } else {
+             document.getElementById("response-container").className = "alert alert-danger";
+             document.getElementById("response-container").innerHTML = "Error saving questions.";
          }
          console.log(JSON.parse(xhr.responseText));
         }
       } 
 
       data = new FormData();
-      for (i in questions) {
+      for (i in cleanedQuestions) {
           // Do not add empty rows - a unique ID label is required
-          if (questions[i][1] !== null) {
-          console.log(questions[i])
-          console.log(questions[i][1])
+          if (questions[i][1] !== null){
           data.append('id[]', questions[i][0]);
           data.append('label[]', questions[i][1]);
           data.append('text[]', questions[i][2]);
-          data.append('cognitive_atlas_concept[]', questions[i][3]);
-          data.append('required[]', questions[i][4]);
-          data.append('data_type[]', questions[i][5]);
+          data.append('options[]', questions[i][3]);
+          data.append('data_type[]', questions[i][4]);
+          data.append('cognitive_atlas_concept[]', questions[i][5]);
           }
       }
-      
+
       xhr.open('POST', "edit", false);
       xhr.setRequestHeader("X-CSRFToken", csrftoken);
       response = xhr.send(data);
       console.log(response)
+      spinner.stop(spinner_div);
 });
 
 window.onbeforeunload = function () {

@@ -6,7 +6,9 @@ from cognitiveatlas.api import get_task, get_concept
 tasks = get_task()
 concepts = get_concept()
 
-for task in tasks.json:
+for t in range(0,len(tasks.json)):
+    task = tasks.json[t]
+    print "%s of %s" %(t,len(tasks.json)) 
     task, _ = CognitiveAtlasTask.objects.update_or_create(cog_atlas_id=task["id"], defaults={"name":task["name"]})
     task.save()
 

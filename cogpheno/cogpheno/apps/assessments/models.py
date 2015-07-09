@@ -54,10 +54,11 @@ class Question(models.Model):
         ('DATETIME', 'Date/Time'),
         ('TEXT', 'Text'),
         ('INT', 'Integer'),
+        ('DOUBLE', 'Double')
     )
 
     assessment = models.ForeignKey(Assessment)
-    cognitive_atlas_concept = models.ForeignKey(CognitiveAtlasConcept, help_text="Concept defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Concept", null=True, blank=False, on_delete=DO_NOTHING)
+    cognitive_atlas_concept = models.ForeignKey(CognitiveAtlasConcept, help_text="Concept defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Concept", null=True, blank=False,on_delete=DO_NOTHING)
     text = models.CharField(max_length=500)
     label = models.CharField(max_length=250,help_text="question unique label",unique=True)
     required = models.BooleanField(choices=((False, 'Not required'),
@@ -67,6 +68,7 @@ class Question(models.Model):
                     help_text=("Data type of the question answer"),
                     verbose_name="Data Type",
                     max_length=200, null=False, blank=False, choices=DATA_TYPE_CHOICES)
+    options = models.CharField(max_length=500,default=None,null=True)
 
     def __str__(self):
         return self.text    
@@ -76,6 +78,8 @@ class Question(models.Model):
         return_cid = self.id
         return reverse('question_details', args=[str(return_cid)])
 
+# In future, possibly add an instantiation of an assessment 
+# (pointing to an entire assessment, and an answer for each question)
 
 # Question Options belong to questions
 class QuestionOption(models.Model):
@@ -87,21 +91,3 @@ class QuestionOption(models.Model):
         return self.text    
 
 
-# We can tag a question with a contrast and/or a concept
-class Contrast(models.Model):
-    questions = models.ManyToManyField(Question)
-    cognitive_atlas_id = models.CharField(max_length=250,default=None)
-
-    def __str__(self):
-        return self.cogitive_atlas_id
-
-
-class Concept(models.Model):
-    questions = models.ManyToManyField(Question)
-    cognitive_atlas_id = models.CharField(max_length=250,default=None)
-
-    def __str__(self):
-        return self.cogitive_atlas_id
-
-# In future, possibly add an instantiation of an assessment 
-# (pointing to an entire assessment, and an answer for each question)

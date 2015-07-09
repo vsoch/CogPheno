@@ -156,6 +156,9 @@ def edit_questions(request, assessment_aid, message=1):
     cognitive_atlas_concepts = [ca.name for ca in concepts]
     cognitive_atlas_concepts = '","'.join(cognitive_atlas_concepts)
 
+    import pickle
+    pickle.dump(request.POST,open("/home/vanessa/Desktop/test.pkl","wb"))
+
     # Update questions on post
     if request.method == "POST":
         
@@ -167,7 +170,7 @@ def edit_questions(request, assessment_aid, message=1):
                 new_question=dict()
                 for i in range(len(content)):
                     label = data[i][0].replace("[]","")
-                    value = data[i][1][n]
+                    value = data[i][1][n].replace('"',"").replace("\n"," ").replace("\r"," ")
                     new_question[label] = value
                     # Look up cognitive atlas concept
                     if label == "cognitive_atlas_concept":
@@ -175,12 +178,12 @@ def edit_questions(request, assessment_aid, message=1):
                             concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
                         except:
                             concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
-                Question.objects.update_or_create(assessment=assessment, 
-                                          text=new_question["text"],
-                                          label=new_question["label"],
-                                          data_type=new_question["data_type"],
-                                          required=bool(new_question["required"]),
-                                          cognitive_atlas_concept=concept)
+                ques = Question.objects.get_or_create(assessment=assessment,label=new_question["label"].replace(" ",""))
+                ques[0].text=new_question["text"]                          
+                ques[0].data_type=new_question["data_type"]
+                ques[0].cognitive_atlas_concept=concept
+                ques[0].options=new_question["options"]
+                ques[0].save()
             return JsonResponse({"result":"success"})
         except:
             return JsonResponse({"result":"error"})

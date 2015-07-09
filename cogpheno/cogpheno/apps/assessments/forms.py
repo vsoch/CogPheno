@@ -4,6 +4,7 @@ from cogpheno.apps.assessments.models import Assessment, Question
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.helper import FormHelper
 from django.forms import ModelForm
+from django import forms
 
 
 
@@ -12,6 +13,10 @@ class AssessmentForm(ModelForm):
     class Meta:
         model = Assessment
         fields = ("name","pub_date","cognitive_atlas_task","abbreviation","version")
+        widgets = {
+            'pub_date': forms.DateInput(attrs={'class':'datepicker'}),
+        }
+
 
     def clean(self):
         cleaned_data = super(AssessmentForm, self).clean()
@@ -34,7 +39,7 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Question
-        fields = ("assessment","label","text","cognitive_atlas_concept","required","data_type")
+        fields = ("assessment","label","text","cognitive_atlas_concept","data_type","options","required")
 
     def clean(self):
         cleaned_data = super(QuestionForm, self).clean()
