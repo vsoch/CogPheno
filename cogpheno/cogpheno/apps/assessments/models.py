@@ -35,8 +35,8 @@ class Assessment(models.Model):
     name = models.CharField(max_length=250)
     pub_date = models.DateTimeField('date published')
     cognitive_atlas_task = models.ForeignKey(CognitiveAtlasTask, help_text="Assessment defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Task", null=True, blank=False, on_delete=DO_NOTHING)
-    abbreviation = models.CharField(max_length=250,help_text="Assessment abbreviation")
-    version = models.CharField(max_length=10,help_text="version")
+    abbreviation = models.CharField(max_length=250,help_text="Assessment abbreviation",default=None,null=True,blank=True)
+    version = models.CharField(max_length=10,help_text="version",null=True,blank=True)
 
     def __str__(self):
         return self.name

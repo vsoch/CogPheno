@@ -9,7 +9,35 @@
 {% crispy form %}
 
 <script type="text/javascript">
-  	$('#id_cognitive_atlas_concept').select2();
+    $('#id_cognitive_atlas_concept').select2();
+ 
+    // Append the next button
+    var form = document.getElementsByTagName("Form")
+    {% if next_question %}
+        $('#submit-id-submit').after($('<div class="float-right-wrapper"><a class="btn btn-primary" href="{% url "edit_question" previous_question %}" id="edit_question">Previous</a><a class="btn btn-primary" style="margin-left:5px" href="{% url "edit_question" next_question %}" id="edit_question">Next</a></div>')); 
+
+    // Arrow keys will work too
+    function leftArrowPressed() {
+        window.location.href = "{% url 'edit_question' previous_question %}"
+    }
+
+    function rightArrowPressed() {
+        window.location.href = "{% url 'edit_question' next_question %}" 
+    }
+
+    document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    switch (evt.keyCode) {
+        case 37:
+            leftArrowPressed();
+            break;
+        case 39:
+            rightArrowPressed();
+            break;
+    }
+};
+
+    {% endif %}
 </script>
 
 {% endblock %}

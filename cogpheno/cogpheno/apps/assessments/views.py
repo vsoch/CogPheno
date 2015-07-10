@@ -5,6 +5,7 @@ from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm
 from cogpheno.apps.assessments.models import Assessment, Question
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+import uuid
 import json
 import csv
 
@@ -105,11 +106,25 @@ def edit_assessment(request,aid=None):
 def edit_question(request,qid=None):
 
     page_header = "Add new question"
+    next_question = None
+    previous_question = None
 
     # Editing an existing assessment
     if qid:
         question = get_question(qid,request)
         page_header = 'Edit question'
+        # Get the next question
+        question_ids = [x.id for x in question.assessment.question_set.all()]
+        idx = question_ids.index(int(qid))
+        if idx == len(question_ids)-1:
+            next_question = question_ids[0]
+            previous_question = question_ids[idx-1]
+        else:
+            next_question = question_ids[idx+1]
+            previous_question = question_ids[idx-1]
+        if idx == 0:
+            previous_question = question_ids[len(question_ids)-1] 
+ 
     else:
         question = Question()
 
@@ -129,7 +144,12 @@ def edit_question(request,qid=None):
     else:
         form = QuestionForm(instance=question)
 
-    context = {"form": form, "page_header": page_header,"active":"questions"}
+    context = {"form": form, 
+               "page_header": page_header,
+               "active":"questions",
+               "next_question": next_question,
+               "previous_question" : previous_question}
+
     return render(request, "edit_question.html", context)
 
 # Delete an assessment
@@ -177,7 +197,12 @@ def edit_questions(request, assessment_aid, message=1):
                         try:
                             concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
                         except:
-                            concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
+                            try:
+                                concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
+                            except:
+                                concept = CognitiveAtlasConcept(cog_atlas_id=str(uuid.uuid4()),name=value,definition="")
+                                concept.save()
+
                 ques = Question.objects.get_or_create(assessment=assessment,label=new_question["label"].replace(" ",""))
                 ques[0].text=new_question["text"]                          
                 ques[0].data_type=new_question["data_type"]
