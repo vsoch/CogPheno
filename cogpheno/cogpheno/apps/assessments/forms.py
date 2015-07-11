@@ -39,7 +39,7 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Question
-        fields = ("assessment","label","text","cognitive_atlas_concept","data_type","options","required")
+        fields = ("assessment","label","text","cognitive_atlas_concept","direction","data_type","options","required")
 
     def clean(self):
         cleaned_data = super(QuestionForm, self).clean()

@@ -63,7 +63,12 @@ class Question(models.Model):
     label = models.CharField(max_length=250,help_text="question unique label",unique=True)
     required = models.BooleanField(choices=((False, 'Not required'),
                                             (True, 'Required')),
-                                            default=True,verbose_name="Required")  
+                                            default=True,verbose_name="Required") 
+    direction = models.CharField(choices=(("positive", 'Positive (same direction)'),
+                                          ("negative", 'Negative (inverse relationship)')),
+                                          default="positive",verbose_name="Directionality",
+                                          max_length=10)
+ 
     data_type = models.CharField(
                     help_text=("Data type of the question answer"),
                     verbose_name="Data Type",

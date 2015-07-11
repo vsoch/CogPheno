@@ -72,7 +72,7 @@ $(document).ready(function () {
   };
  
   var data = [
-      {% for question in questions %} ["{{ question.id|safe }}","{{ question.label|safe }}","{{ question.text|safe }}","{{ question.options | safe }}","{{ question.data_type | safe }}","{{ question.cognitive_atlas_concept|safe}}"],
+      {% for question in questions %} ["{{ question.id|safe }}","{{ question.label|safe }}","{{ question.text|safe }}","{{ question.options | safe }}","{{ question.data_type | safe }}","{{ question.cognitive_atlas_concept|safe}}","{{ question.direction | safe }}"],
       {% endfor %}
   ];
   
@@ -102,7 +102,12 @@ $(document).ready(function () {
        source: ["{{ cognitive_atlas_concepts|safe }}"],
        strict: false,
        data:5,
-      }
+      },
+       {type: 'autocomplete',
+       source: ["positive","negative"],
+       strict: true,
+       data:6
+      },
     ]
   });
 
@@ -180,6 +185,7 @@ $('.btn-save-questions').click(function () {
           data.append('options[]', questions[i][3]);
           data.append('data_type[]', questions[i][4]);
           data.append('cognitive_atlas_concept[]', questions[i][5]);
+          data.append('direction[]', questions[i][6]);
           }
       }
 

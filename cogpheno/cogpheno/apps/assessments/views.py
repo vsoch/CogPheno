@@ -208,6 +208,7 @@ def edit_questions(request, assessment_aid, message=1):
                 ques[0].data_type=new_question["data_type"]
                 ques[0].cognitive_atlas_concept=concept
                 ques[0].options=new_question["options"]
+                ques[0].options=new_question["direction"]
                 ques[0].save()
             return JsonResponse({"result":"success"})
         except:
