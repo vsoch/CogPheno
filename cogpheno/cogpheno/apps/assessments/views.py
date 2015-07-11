@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render_to_response, render, redirect
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import PermissionDenied, ValidationError
-from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm
+from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm
 from cogpheno.apps.assessments.models import Assessment, Question
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -32,6 +32,19 @@ def get_question(qid,request,mode=None):
     else:
         return question
 
+# Get the next and previous question
+def get_next_previous_question(question):
+    question_ids = [x.id for x in question.assessment.question_set.all()]
+    idx = question_ids.index(int(question.id))
+    if idx == len(question_ids)-1:
+        next_question = question_ids[0]
+        previous_question = question_ids[idx-1]
+    else:
+        next_question = question_ids[idx+1]
+        previous_question = question_ids[idx-1]
+    if idx == 0:
+        previous_question = question_ids[len(question_ids)-1] 
+    return next_question,previous_question
 
 #### VIEWS #############################################################
 
@@ -49,9 +62,12 @@ def view_assessment(request, aid):
 # View a single question
 def view_question(request, qid):
     question = get_question(qid,request)
+    next_question,previous_question = get_next_previous_question(question)
     context = {'question': question,
                'qid':qid,
-               'active':'questions'}
+               'active':'questions',
+               'next_question':next_question,
+               'previous_question':previous_question}
 
     return render_to_response('question_details.html', context)
 
@@ -113,17 +129,7 @@ def edit_question(request,qid=None):
     if qid:
         question = get_question(qid,request)
         page_header = 'Edit question'
-        # Get the next question
-        question_ids = [x.id for x in question.assessment.question_set.all()]
-        idx = question_ids.index(int(qid))
-        if idx == len(question_ids)-1:
-            next_question = question_ids[0]
-            previous_question = question_ids[idx-1]
-        else:
-            next_question = question_ids[idx+1]
-            previous_question = question_ids[idx-1]
-        if idx == 0:
-            previous_question = question_ids[len(question_ids)-1] 
+        next_question,previous_question = get_next_previous_question(question)
  
     else:
         question = Question()
@@ -144,11 +150,16 @@ def edit_question(request,qid=None):
     else:
         form = QuestionForm(instance=question)
 
+    # If the user wants to add a concept
+    addconceptform = AddConceptForm()
+
     context = {"form": form, 
                "page_header": page_header,
                "active":"questions",
                "next_question": next_question,
-               "previous_question" : previous_question}
+               "previous_question" : previous_question,
+               "question": question,
+               "addconceptform" : addconceptform}
 
     return render(request, "edit_question.html", context)
 
@@ -197,11 +208,7 @@ def edit_questions(request, assessment_aid, message=1):
                         try:
                             concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
                         except:
-                            try:
-                                concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
-                            except:
-                                concept = CognitiveAtlasConcept(cog_atlas_id=str(uuid.uuid4()),name=value,definition="")
-                                concept.save()
+                            concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
 
                 ques = Question.objects.get_or_create(assessment=assessment,label=new_question["label"].replace(" ",""))
                 ques[0].text=new_question["text"]                          
@@ -227,6 +234,17 @@ def edit_questions(request, assessment_aid, message=1):
 def get_questions(assessment):
     return assessment.question_set.all()
 
+
+# Add a concept
+def add_concept(request,qid):
+    if request.method == "POST":
+        from cogpheno.apps.assessments.models import CognitiveAtlasConcept
+        # Add the new concept
+        new_concept = request.POST["new_concept"]
+        concept = CognitiveAtlasConcept(cog_atlas_id=str(uuid.uuid4()),name=new_concept,definition="")
+        concept.save()
+    question = get_question(qid,request)
+    return HttpResponseRedirect("%sedit" %question.get_absolute_url())
 
 #### EXPORT #############################################################
 

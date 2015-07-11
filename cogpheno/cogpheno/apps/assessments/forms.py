@@ -30,6 +30,18 @@ class AssessmentForm(ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
+
+
+class AddConceptForm(forms.Form):
+    new_concept = forms.CharField(label='Concept Name', max_length=100)
+
+    def __init__(self, *args, **kwargs):
+
+        super(AddConceptForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8'
         self.helper.layout = Layout()
         tab_holder = TabHolder()
         self.helper.add_input(Submit("submit", "Save"))

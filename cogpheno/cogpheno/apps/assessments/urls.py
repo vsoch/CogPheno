@@ -1,4 +1,4 @@
-from .views import assessments_view, questions_view, edit_assessment, edit_question, view_assessment, view_question, delete_assessment, delete_question, edit_questions, export_questions, export_questions, export_assessment
+from .views import assessments_view, questions_view, edit_assessment, edit_question, view_assessment, view_question, delete_assessment, delete_question, edit_questions, export_questions, export_questions, export_assessment, add_concept
 from django.views.generic.base import TemplateView
 from django.conf.urls import patterns, url
 from django.contrib import admin
@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^questions/(?P<qid>\d+|[A-Z]{8})/edit$',edit_question,name='edit_question'),
     url(r'^assessments/(?P<aid>\d+|[A-Z]{8})/$',view_assessment, name='assessment_details'),
     url(r'^questions/(?P<qid>\d+|[A-Z]{8})/$',view_question, name='question_details'),
+    url(r'^concepts/(?P<qid>\d+|[A-Z]{8})/add/$',add_concept, name='add_concept'),
     url(r'^assessments/(?P<aid>\d+|[A-Z]{8})/delete$',delete_assessment,name='delete_assessment'),
     url(r'^assessments/(?P<aid>\d+|[A-Z]{8})/export$',export_assessment,name='export_assessment'),
     url(r'^questions/export$',export_questions,name='export_questions'),

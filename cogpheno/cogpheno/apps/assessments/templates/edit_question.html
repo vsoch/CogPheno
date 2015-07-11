@@ -5,12 +5,53 @@
     <link rel="stylesheet" href="{% static "css/select2.min.css" %}" />
 {% endblock %}
 {% block content %}
+
+<!-- Modal -->
+<div id="newconcept" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+ 
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add a new concept</h4>
+      </div>
+      <div class="modal-body">
+          <form class="form-horizonal" action="{% url 'add_concept' question.id %}" method="post">
+              {{ addconceptform }}
+              {% csrf_token %}
+              <input type="submit" class="btn btn-success" name="Save" value="Save"/>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
 <h1>{{ page_header }}</h1>
 {% crispy form %}
 
 <script type="text/javascript">
-    $('#id_cognitive_atlas_concept').select2();
  
+    $('#id_cognitive_atlas_concept').select2({
+        tags: true
+    })
+
+
+    // Append a button to add a concept
+    $("#hint_id_cognitive_atlas_concept").after($('<div class="float-right-wrapper"><a class="btn btn-primary" onclick="new_concept()">New Concept</a></div>')); 
+
+
+    // If we press the button, give option to add new concept
+    function new_concept() {
+        $('#newconcept').modal('toggle');
+    }
+
+   
     // Append the next button
     var form = document.getElementsByTagName("Form")
     {% if next_question %}

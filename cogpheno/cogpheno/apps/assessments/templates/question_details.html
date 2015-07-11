@@ -16,62 +16,93 @@ $('#delete_question').click(function(e) {
             <div class="float-right-wrapper">
                 <a class='btn btn-danger' href='{% url 'delete_question' qid %}' id="delete_question"> Delete Question</a>
             </div>
-      </div>
+        </div>
+    </div>
 </div>
-
-
+<div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-body">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
-            </ul>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+                </ul>
             <div class="tab-content">
                 <div class="tab-pane fade in active" id="details">
                     <h4>Question Details</h4>
-    <table class="table table-condensed table-striped table-hover" id="details-table">
-      <thead>
-        <tr>
-          <th>Field</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-                         <tbody>
-                             <tr>
-                                 <td>Assessment</td>
-                                 <td>{{ question.assessment }}</td>
-                             </tr>
-                             <tr>
-                                 <td>Label</td>
-                                 <td>{{ question.label }}</td>
-                             </tr>
-                                 <td>Question Text</td>
-                                 <td>{{ question.text }}</td>
-                             </tr>
-                             <tr>
-                                 <td>Cognitive Atlas Concept</td>
-                                 <td>{{ question.cognitive_atlas_concept }}</td>
-                             </tr>
-                             <tr>
-                                 <td>Required</td>
-                                 <td>{{ question.required }}</td>
-                             </tr>
-                             <tr>
-                                 <td>Data Type</td>
-                                 <td>{{ question.data_type }}</td>
-                             </tr>
-                         </tbody>
-                       </table>      
+                        <table class="table table-condensed table-striped table-hover" id="details-table">
+                            <thead>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                            </thead>
+                            <tbody>
+                                <tr>
+					<td>Assessment</td>
+					<td>{{ question.assessment }}</td>
+                                </tr>
+                                <tr>
+					<td>Label</td>
+					<td>{{ question.label }}</td>
+                                </tr>
+					<td>Question Text</td>
+					<td>{{ question.text }}</td>
+                                </tr>
+                                <tr>
+					<td>Cognitive Atlas Concept</td>
+					<td>{{ question.cognitive_atlas_concept }}</td>
+                                </tr>
+                                <tr>
+					<td>Direction</td>
+					<td>{{ question.direction }}</td>
+                                </tr>
+                                <tr>
+					<td>Required</td>
+					<td>{{ question.required }}</td>
+                                </tr>
+                                <tr>
+					<td>Options</td>
+					<td>{{ question.options }}</td>
+                                </tr>
+                                <tr>
+					<td>Data Type</td>
+					<td>{{ question.data_type }}</td>
+                                </tr>
+                            </tbody>
+                        </table>      
+                    </div>
                 </div>
             </div>
         </div>
-   </div>
-</div>
-        <script>
+        <div class="float-right-wrapper">
+            <a class="btn btn-primary" href="{% url "edit_question" previous_question %}" id="edit_question">Previous</a>
+            <a class="btn btn-primary" style="margin-left:5px" href="{% url "edit_question" next_question %}" id="edit_question">Next</a>
+        </div>
+    </div>
+<script>
 $(document).ready(function() {
     $('#details-table').dataTable({
       responsive: true
     });
-} );
+});
+
+// Arrow keys will work too
+function leftArrowPressed() {
+    window.location.href = "{% url 'edit_question' previous_question %}"
+}
+
+function rightArrowPressed() {
+    window.location.href = "{% url 'edit_question' next_question %}" 
+}
+
+document.onkeydown = function(evt) {
+evt = evt || window.event;
+switch (evt.keyCode) {
+    case 37:
+        leftArrowPressed();
+        break;
+    case 39:
+        rightArrowPressed();
+        break;
+    }
+}
 </script>
 {% endblock %}
