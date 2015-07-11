@@ -37,7 +37,7 @@ $('#delete_question').click(function(e) {
                             <tbody>
                                 <tr>
 					<td>Assessment</td>
-					<td>{{ question.assessment }}</td>
+                                        <td><a href='{% url 'assessment_details' question.assessment.id %}'>{{ question.assessment }}</a></td>
                                 </tr>
                                 <tr>
 					<td>Label</td>
