@@ -46,6 +46,15 @@
     $("#hint_id_cognitive_atlas_concept").after($('<div class="float-right-wrapper"><a class="btn btn-primary" onclick="new_concept()">New Concept</a></div>')); 
 
 
+    // Submit form on enter
+    $(document).keypress(function(event){
+        if (event.which == 13) {
+            event.preventDefault();
+            $("#submit-id-submit").click()          
+        }
+    });
+
+
     // If we press the button, give option to add new concept
     function new_concept() {
         $('#newconcept').modal('toggle');

@@ -30,6 +30,9 @@ class AssessmentForm(ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
+        self.helper.layout = Layout()
+        tab_holder = TabHolder()
+        self.helper.add_input(Submit("submit", "Save"))
 
 
 class AddConceptForm(forms.Form):
@@ -65,6 +68,7 @@ class QuestionForm(ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
+        self.helper.form_id = "questionform"
         self.helper.layout = Layout()
         tab_holder = TabHolder()
         self.helper.add_input(Submit("submit", "Save"))
