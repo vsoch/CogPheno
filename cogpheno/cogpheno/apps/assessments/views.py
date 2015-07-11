@@ -281,25 +281,27 @@ def export_assessments(assessments,output_name):
     writer.writerow(['assessment_name',
                      'assessment_number_questions',
                      'assessment_version',
-                     'assessment_pubdate',
                      'question_label', 
                      'question_text',
                      'question_cognitive_atlas_concept',
+                     'question_cognitive_atlas_id',
+                     'question_direction',
                      'question_id',
                      'question_datatype',
-                     'question_required'])
+                     'question_options'])
 
     for assessment in assessments:
         for question in assessment.question_set.all():
             writer.writerow([assessment.name,
                          len(assessment.question_set.all()),
                          assessment.version,
-                         str(assessment.pub_date),
                          question.label,
                          question.text,
                          question.cognitive_atlas_concept,
+                         question.cognitive_atlas_concept_id,
+                         question.direction,
                          question.id,
                          question.data_type,
-                         question.required])
+                         question.options.replace("\t"," ").replace(",","|").replace(";","|")])
 
     return response
