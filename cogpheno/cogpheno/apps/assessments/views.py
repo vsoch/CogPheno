@@ -177,6 +177,14 @@ def delete_question(request, qid):
     return redirect('questions')
 
 
+# Delete a question, redirect to next
+def delete_question_redirect(request, qid):
+    question = get_question(qid,request)
+    next_question,previous_question = get_next_previous_question(question)
+    question.delete()
+    next_question = get_question(next_question,request)
+    return HttpResponseRedirect("%sedit" %next_question.get_absolute_url())
+    
 # Edit all questions view
 def edit_questions(request, assessment_aid, message=1):
     from cogpheno.apps.assessments.models import CognitiveAtlasConcept, Question
