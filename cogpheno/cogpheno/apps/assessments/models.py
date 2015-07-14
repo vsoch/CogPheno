@@ -2,6 +2,21 @@ from django.db.models import Q, DO_NOTHING
 from django.core.urlresolvers import reverse
 from django.db import models
 
+class BehavioralTrait(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    unique_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
+    definition = models.CharField(max_length=200, null=False, blank=False,default=None)
+    
+    def __str__(self):
+        return self.name
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+
 class CognitiveAtlasTask(models.Model):
     name = models.CharField(max_length=200, null=False, blank=False)
     cog_atlas_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
@@ -58,7 +73,7 @@ class Question(models.Model):
     )
 
     assessment = models.ForeignKey(Assessment)
-    cognitive_atlas_concept = models.ForeignKey(CognitiveAtlasConcept, help_text="Concept defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Concept", null=True, blank=False,on_delete=DO_NOTHING)
+    behavioral_trait = models.ForeignKey(BehavioralTrait, help_text="Behavioral trait described by the question", verbose_name="Behavioral Trait", null=True, blank=False,on_delete=DO_NOTHING)
     text = models.CharField(max_length=500)
     label = models.CharField(max_length=250,help_text="question unique label",unique=True)
     required = models.BooleanField(choices=((False, 'Not required'),

@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render_to_response, render, redi
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import PermissionDenied, ValidationError
 from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm
-from cogpheno.apps.assessments.models import Assessment, Question
+from cogpheno.apps.assessments.models import Assessment, Question, BehavioralTrait
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import uuid
@@ -187,16 +187,13 @@ def delete_question_redirect(request, qid):
     
 # Edit all questions view
 def edit_questions(request, assessment_aid, message=1):
-    from cogpheno.apps.assessments.models import CognitiveAtlasConcept, Question
+    from cogpheno.apps.assessments.models import BehavioralTrait, Question
     assessment = get_assessment(assessment_aid, request)
 
-    # Get all cognitive atlas concepts
-    concepts = CognitiveAtlasConcept.objects.all()
-    cognitive_atlas_concepts = [ca.name for ca in concepts]
-    cognitive_atlas_concepts = '","'.join(cognitive_atlas_concepts)
-
-    import pickle
-    pickle.dump(request.POST,open("/home/vanessa/Desktop/test.pkl","wb"))
+    # Get all behavioral traits
+    traits = BehavioralTrait.objects.all()
+    behavioral_traits = [trait.name for trait in traits]
+    behavioral_traits = '","'.join(behavioral_traits)
 
     # Update questions on post
     if request.method == "POST":
@@ -211,17 +208,17 @@ def edit_questions(request, assessment_aid, message=1):
                     label = data[i][0].replace("[]","")
                     value = data[i][1][n].replace('"',"").replace("\n"," ").replace("\r"," ")
                     new_question[label] = value
-                    # Look up cognitive atlas concept
-                    if label == "cognitive_atlas_concept":
+                    # Look up behavioral trait
+                    if label == "behavioral_trait":
                         try:
-                            concept = CognitiveAtlasConcept.objects.all().filter(name=value)[0]
+                            trait = BehavioralTrait.objects.all().filter(name=value)[0]
                         except:
-                            concept = CognitiveAtlasConcept.objects.all().filter(cog_atlas_id=value)[0]
+                            trait = BehavioralTrait.objects.all().filter(unique_id=value)[0]
 
                 ques = Question.objects.get_or_create(assessment=assessment,label=new_question["label"].replace(" ",""))
                 ques[0].text=new_question["text"]                          
                 ques[0].data_type=new_question["data_type"]
-                ques[0].cognitive_atlas_concept=concept
+                ques[0].behavioral_trait=trait
                 ques[0].options=new_question["options"]
                 ques[0].options=new_question["direction"]
                 ques[0].save()
@@ -237,7 +234,7 @@ def edit_questions(request, assessment_aid, message=1):
         'assessment': assessment,
         'questions': questions,
         'active':'questions',
-        'cognitive_atlas_concepts':cognitive_atlas_concepts})
+        'behavioral_traits':behavioral_traits})
 
 def get_questions(assessment):
     return assessment.question_set.all()
@@ -246,10 +243,10 @@ def get_questions(assessment):
 # Add a concept
 def add_concept(request,qid):
     if request.method == "POST":
-        from cogpheno.apps.assessments.models import CognitiveAtlasConcept
+        from cogpheno.apps.assessments.models import BehavioralTrait
         # Add the new concept
         new_concept = request.POST["new_concept"]
-        concept = CognitiveAtlasConcept(cog_atlas_id=str(uuid.uuid4()),name=new_concept,definition="")
+        concept = BehavioralTrait(unique_id=str(uuid.uuid4()),name=new_concept,definition="")
         concept.save()
     question = get_question(qid,request)
     return HttpResponseRedirect("%sedit" %question.get_absolute_url())
@@ -283,8 +280,8 @@ def export_assessments(assessments,output_name):
                      'assessment_version',
                      'question_label', 
                      'question_text',
-                     'question_cognitive_atlas_concept',
-                     'question_cognitive_atlas_id',
+                     'question_behavioral_trait',
+                     'question_behavioral_trait_id',
                      'question_direction',
                      'question_id',
                      'question_datatype',
@@ -297,8 +294,8 @@ def export_assessments(assessments,output_name):
                          assessment.version,
                          question.label,
                          question.text,
-                         question.cognitive_atlas_concept,
-                         question.cognitive_atlas_concept_id,
+                         question.behavioral_trait,
+                         question.behavioral_trait_id,
                          question.direction,
                          question.id,
                          question.data_type,

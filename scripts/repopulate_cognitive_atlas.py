@@ -1,5 +1,6 @@
 import os
 import json
+import pandas
 from cogpheno.apps.assessments.models import CognitiveAtlasTask, CognitiveAtlasConcept
     
 from cognitiveatlas.api import get_task, get_concept
@@ -26,4 +27,20 @@ for c in range(0,len(concepts.json)):
     concept = concepts.json[c]
     print "%s of %s" %(c,len(concepts.json))
     concept, _ = CognitiveAtlasConcept.objects.update_or_create(cog_atlas_id=concept["id"], defaults={"name":concept["name"]},definition=concept["definition_text"])
+    concept.save()
+
+# Add in Cattell's behavioral metrics
+behaviors = pandas.read_pickle("../scripts/cattell_personality_282.pkl")
+behaviors = behaviors.fillna("")
+
+for b in behaviors.iterrows():
+    print "Adding %s of %s" %(b[0],len(behaviors.index))
+    trait = b[1].trait
+    definition = b[1].definition
+    uid = "CATTELL%s" %b[1].id
+    if trait == "interests special":        
+        trait = "interest:%s" %(b[1].subtype_level1)
+    if trait == "abilities":
+        trait = "ability:%s" %("-".join([b[1].subtype_level1,b[1].subtype_level2]))
+    concept, _ = CognitiveAtlasConcept.objects.update_or_create(cog_atlas_id=uid, defaults={"name":trait},definition=definition)
     concept.save()
