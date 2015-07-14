@@ -89,6 +89,14 @@ def questions_view(request):
     return render(request, 'all_questions.html', context)
 
 
+# All behavior
+def behaviors_view(request):
+    behaviors = BehavioralTrait.objects.all()
+    context = {'behaviors': behaviors,
+               'active':'behaviors'}
+    return render(request, 'all_behaviors.html', context)
+
+
 #### EDIT/ADD/DELETE #############################################################
 
 # Add assessment
