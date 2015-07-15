@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <table class="table table-condensed table-striped table-hover" id="behaviors-table">
+      <thead>
+        <tr>
+          <th>Behavior</th>
+          <th>Definition</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for behavior in behaviors %}
+          <tr>
+            <td>{{ behavior.name }}</td>
+            <td>{{ behavior.definition }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+<script>
+$(document).ready(function() {
+    $('#behaviors-table').dataTable({
+      responsive: true
+    });
+} );
+</script>
+{% endblock %}
