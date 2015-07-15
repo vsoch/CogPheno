@@ -39,3 +39,4 @@ The base of this work is just a simple list of words, modern, that experts have 
 - Relationships will also be defined to say that some words are measuring the same thing. (eg, interruptive and intrusive)
 - If using a verb, the verb should be used in the infinite sense (eg, "sustaining," or "listening")
 - dislikes / preferences are also modeled in this manner. It is assumed that asking a question if an individual prefers / likes a behavior is equivalent to measuring a behavioral trait. 
+- Descriptors ca be added to terms. For example, "craving carbohydrate" is different from "craving fat" and at some point these could be both grouped under "craving food"
