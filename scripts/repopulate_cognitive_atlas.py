@@ -33,6 +33,7 @@ for c in range(0,len(concepts.json)):
 behaviors = pandas.read_pickle("../scripts/cattell_personality_282.pkl")
 behaviors = behaviors.fillna("")
 
+
 for b in behaviors.iterrows():
     print "Adding %s of %s" %(b[0],len(behaviors.index))
     trait = b[1].trait
