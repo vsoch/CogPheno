@@ -2,6 +2,8 @@
 
 This project aims to tag individual assessment questions (with tasks defined from the Cognitive Atlas) with behavioral traits (with a set of behavioral trait descriptors developed by me).
 
+![cogatpheno](cogpheno/cogpheno/apps/assessments/static/img/assessments.png)
+
 #### Overview
 
 Behavioral assessments capture meaningful information about individual personalities and behavior. While we have structured terms and relationships for cognitive processes (cognitive atlas) and neurologically derived behaviors (neuro behavioral ontology) or specific disorders (autism), if one wants to describe behaviors that capture personality traits, we are lost.
