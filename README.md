@@ -34,7 +34,7 @@ We can then get more creative with regard to the sources of information that we 
 The base of this work is just a simple list of words, modern, that experts have used to describe people.
 
 #### Tagging Procedure
-- Each question must be associated with an adjective (behavioral trait descriptor) or a verb (behavioral statement) in the case that the question cannot be linked to any specific adjective.
+- Each question must be associated with an adjective (behavioral trait descriptor) or a verb (behavioral statement) in the case that the question cannot be linked to any specific adjective. In the case that the question is describing a symptom (eg, racing thoughts) in which case it would be necessary to say "has racing thoughts," a noun can be used.
 - Each time I make a tag to a question, I am making an assertion that a question is measuring the behavioral tag, with the indicated direction
 - The direction would theoretically add a descriptor, such as "more" or "less" (or the person could be equivalent to an average)
 - Relationships will be defined to describe opposite words (eg, impatient and patient), and these will be mapped to the same dimension based on the direction specified. (eg, impatient positive == patient negative, impatient negative == patient positive)
@@ -42,3 +42,4 @@ The base of this work is just a simple list of words, modern, that experts have 
 - If using a verb, the verb should be used in the infinite sense (eg, "sustaining," or "listening")
 - dislikes / preferences are also modeled in this manner. It is assumed that asking a question if an individual prefers / likes a behavior is equivalent to measuring a behavioral trait. 
 - Descriptors ca be added to terms. For example, "craving carbohydrate" is different from "craving fat" and at some point these could be both grouped under "craving food"
+- Questions that summarize (final scores, factors, etc) will be removed, as the information is redundant.
