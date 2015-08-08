@@ -12,7 +12,7 @@
       <tbody>
         {% for behavior in behaviors %}
           <tr>
-            <td>{{ behavior.name }}</td>
+            <td><a href="/behaviors/{{ behavior.pk }}">{{ behavior.name }}</a></td>
             <td>{{ behavior.definition }}</td>
           </tr>
         {% endfor %}

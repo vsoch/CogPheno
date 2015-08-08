@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render_to_response, render, redirect
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import PermissionDenied, ValidationError
-from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm
+from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm, BehaviorForm
 from cogpheno.apps.assessments.models import Assessment, Question, BehavioralTrait
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -20,6 +20,17 @@ def get_assessment(aid,request,mode=None):
         raise Http404
     else:
         return assessment
+
+
+# get behavior
+def get_behavior(bid,request,mode=None):
+    keyargs = {'pk':bid}
+    try:
+        behavior = BehavioralTrait.objects.get(**keyargs)
+    except BehavioralTrait.DoesNotExist:
+        raise Http404
+    else:
+        return behavior
 
 
 # get question
@@ -58,6 +69,26 @@ def view_assessment(request, aid):
             'active':'assessments'}
 
     return render_to_response('assessment_details.html', context)
+
+# View a single behavior (and edit)
+def view_behavior(request, bid):
+    behavior = get_behavior(bid,request)
+    if request.method == "POST":
+        form = BehaviorForm(request.POST, instance=behavior)
+
+        if form.is_valid():
+            behavior = form.save(commit=False)
+            behavior.save()
+
+            context = {
+                'behavior': behavior.name,
+            }
+            return HttpResponseRedirect(behavior.get_absolute_url())
+    else:
+        form =  BehaviorForm(instance=behavior)
+
+    context = {"form": form, "active":"behaviors"}
+    return render_to_response('behavior_details.html', context)
 
 # View a single question
 def view_question(request, qid):
