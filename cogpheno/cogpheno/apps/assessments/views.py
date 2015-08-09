@@ -64,30 +64,19 @@ def view_assessment(request, aid):
     assessment = get_assessment(aid,request)
     questions = assessment.question_set.all()
     context = {'assessment': assessment,
-            'questions': questions,
-            'aid':aid,
-            'active':'assessments'}
+               'questions': questions,
+               'aid':aid,
+               'active':'assessments'}
 
     return render_to_response('assessment_details.html', context)
 
-# View a single behavior (and edit)
+# View a single behavior
 def view_behavior(request, bid):
     behavior = get_behavior(bid,request)
-    if request.method == "POST":
-        form = BehaviorForm(request.POST, instance=behavior)
+    context = {'behavior': behavior,
+               'bid':bid,
+               'active':'behaviors'}
 
-        if form.is_valid():
-            behavior = form.save(commit=False)
-            behavior.save()
-
-            context = {
-                'behavior': behavior.name,
-            }
-            return HttpResponseRedirect(behavior.get_absolute_url())
-    else:
-        form =  BehaviorForm(instance=behavior)
-
-    context = {"form": form, "active":"behaviors"}
     return render_to_response('behavior_details.html', context)
 
 # View a single question
@@ -157,6 +146,30 @@ def edit_assessment(request,aid=None):
     return render(request, "edit_assessment.html", context)
 
 
+# Edit a behavior
+def edit_behavior(request, bid):
+    
+    behavior = get_behavior(bid,request)
+
+    if request.method == "POST":
+        from textblob import Word
+        behavior.name = request.POST.get("name", "")
+        behavior.wordnet_synset = request.POST.get("synset", "")
+        behavior.definition = request.POST.get("definition", "")
+        behavior.save()
+        context = {
+                'behavior': behavior,
+        }
+        return HttpResponseRedirect(behavior.get_absolute_url())
+    else:
+        form =  BehaviorForm(instance=behavior)
+
+    context = {"form": form, 
+               "active":"behaviors",
+               "behavior":behavior}
+
+    return render(request,'edit_behavior.html', context)
+
 # Edit a single question
 def edit_question(request,qid=None):
 
@@ -164,7 +177,7 @@ def edit_question(request,qid=None):
     next_question = None
     previous_question = None
 
-    # Editing an existing assessment
+    # Editing an existing question
     if qid:
         question = get_question(qid,request)
         page_header = 'Edit question'
@@ -207,6 +220,13 @@ def delete_assessment(request, aid):
     assessment = get_assessment(aid,request)
     assessment.delete()
     return redirect('assessments')
+
+
+# Delete a behavior
+def delete_behavior(request, bid):
+    behavior = get_behavior(bid,request)
+    behavior.delete()
+    return redirect('behaviors')
 
 
 # Delete a question

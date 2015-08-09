@@ -5,8 +5,9 @@ from django.db import models
 class BehavioralTrait(models.Model):
     name = models.CharField(max_length=200, null=False, blank=False)
     unique_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
-    definition = models.CharField(max_length=200, null=False, blank=False,default=None)
-    
+    definition = models.CharField(max_length=1000, null=True, blank=True,default=None)
+    wordnet_synset = models.CharField(max_length=200, null=True, blank=True,default=None)   
+
     def __str__(self):
         return self.name
     
@@ -15,6 +16,11 @@ class BehavioralTrait(models.Model):
     
     class Meta:
         ordering = ['name']
+
+    # Get the url for a behavior
+    def get_absolute_url(self):
+        return_bid = self.pk
+        return reverse('behavior_details', args=[str(return_bid)])
 
 
 class CognitiveAtlasTask(models.Model):
