@@ -341,6 +341,7 @@ def export_assessments(assessments,output_name):
                      'question_text',
                      'question_behavioral_trait',
                      'question_behavioral_trait_id',
+                     'question_behavioral_trait_synset',
                      'question_direction',
                      'question_id',
                      'question_datatype',
@@ -348,6 +349,10 @@ def export_assessments(assessments,output_name):
 
     for assessment in assessments:
         for question in assessment.question_set.all():
+            if question.behavioral_trait == None:
+                synset = "None"
+            else:
+                synset = question.behavioral_trait.wordnet_synset
             writer.writerow([assessment.name,
                          len(assessment.question_set.all()),
                          assessment.version,
@@ -355,6 +360,7 @@ def export_assessments(assessments,output_name):
                          question.text,
                          question.behavioral_trait,
                          question.behavioral_trait_id,
+                         synset,
                          question.direction,
                          question.id,
                          question.data_type,

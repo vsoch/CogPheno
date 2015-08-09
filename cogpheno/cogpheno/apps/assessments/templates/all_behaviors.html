@@ -7,6 +7,7 @@
         <tr>
           <th>Behavior</th>
           <th>Definition</th>
+          <th>Synset</th>
         </tr>
       </thead>
       <tbody>
@@ -14,6 +15,7 @@
           <tr>
             <td><a href="/behaviors/{{ behavior.pk }}">{{ behavior.name }}</a></td>
             <td>{{ behavior.definition }}</td>
+            <td>{{ behavior.wordnet_synset }}</td>
           </tr>
         {% endfor %}
       </tbody>
