@@ -1,5 +1,6 @@
 from django.db.models import Q, DO_NOTHING
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 from django.db import models
 
 class BehavioralTrait(models.Model):
@@ -58,6 +59,8 @@ class Assessment(models.Model):
     cognitive_atlas_task = models.ForeignKey(CognitiveAtlasTask, help_text="Assessment defined in the <a href='http://www.cognitiveatlas.org/'>Cognitive Atlas</a>", verbose_name="Cognitive Atlas Task", null=True, blank=False, on_delete=DO_NOTHING)
     abbreviation = models.CharField(max_length=250,help_text="Assessment abbreviation",default=None,null=True,blank=True)
     version = models.CharField(max_length=10,help_text="version",null=True,blank=True)
+    owner = models.ForeignKey(User,default=None,null=True,blank=True)
+    contributors = models.ManyToManyField(User,related_name="assessment_contributors",related_query_name="contributor", blank=True,help_text="Select other CogatPheno users to add as contributes to the assessment.  Contributors can add, edit and delete questions in the assessment.",verbose_name="Contributors")
 
     def __str__(self):
         return self.name

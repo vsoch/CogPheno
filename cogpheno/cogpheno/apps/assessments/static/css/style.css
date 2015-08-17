@@ -64,3 +64,17 @@ body {
   font-size: 1.8em;
   color: #442C50;
 }
+
+/* Login Form */
+
+.login-wrapper {
+  width:350px; 
+  margin-left:36%;
+  margin-top:60px
+}
+
+.signup-wrapper {
+  width: 600px;
+  margin-top: 30px;
+  margin-left: 30%;
+}

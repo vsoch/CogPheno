@@ -11,8 +11,10 @@ template.add_to_builtins('django.templatetags.future')
 template.add_to_builtins('django.contrib.staticfiles.templatetags.staticfiles')
 
 urlpatterns = patterns('',
+                       url('', include('social.apps.django_app.urls', namespace='social')),
                        url(r'^', include('cogpheno.apps.main.urls')),
                        url(r'^', include('cogpheno.apps.assessments.urls')),
+                       url(r'^accounts/', include('cogpheno.apps.users.urls')),
                        url(r'^admin/', include(admin.site.urls)))
 
 if settings.DEBUG:

@@ -1,13 +1,22 @@
+from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm, BehaviorForm
 from django.shortcuts import get_object_or_404, render_to_response, render, redirect
+from cogpheno.apps.assessments.models import Assessment, Question, BehavioralTrait
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import PermissionDenied, ValidationError
-from cogpheno.apps.assessments.forms import AssessmentForm, QuestionForm, AddConceptForm, BehaviorForm
-from cogpheno.apps.assessments.models import Assessment, Question, BehavioralTrait
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import uuid
 import json
 import csv
+
+### AUTHENTICATION ####################################################
+
+def owner_or_contrib(request,assessment):
+    if assessment.owner == request.user or request.user in collection.contributors.all() or request.user.is_superuser:
+        return True
+    return False
+
 
 #### GETS #############################################################
 
@@ -120,6 +129,7 @@ def behaviors_view(request):
 #### EDIT/ADD/DELETE #############################################################
 
 # Add assessment
+@login_required
 def edit_assessment(request,aid=None):
 
     # Editing an existing assessment
@@ -128,6 +138,8 @@ def edit_assessment(request,aid=None):
     else:
         assessment = Assessment()
 
+    if not owner_or_contrib(request,assessment):
+        return HttpResponseForbidden()
     if request.method == "POST":
         form = AssessmentForm(request.POST, instance=assessment)
 
@@ -147,6 +159,7 @@ def edit_assessment(request,aid=None):
 
 
 # Edit a behavior
+@login_required
 def edit_behavior(request, bid):
     
     behavior = get_behavior(bid,request)
@@ -171,11 +184,17 @@ def edit_behavior(request, bid):
     return render(request,'edit_behavior.html', context)
 
 # Edit a single question
+@login_required
 def edit_question(request,qid=None):
 
     page_header = "Add new question"
     next_question = None
     previous_question = None
+
+    # Check if the user owns the assessment
+    #if not owner_or_contrib(request,assessment):
+    #    return HttpResponseForbidden()
+
 
     # Editing an existing question
     if qid:
@@ -216,6 +235,7 @@ def edit_question(request,qid=None):
     return render(request, "edit_question.html", context)
 
 # Delete an assessment
+@login_required
 def delete_assessment(request, aid):
     assessment = get_assessment(aid,request)
     assessment.delete()
@@ -223,6 +243,7 @@ def delete_assessment(request, aid):
 
 
 # Delete a behavior
+@login_required
 def delete_behavior(request, bid):
     behavior = get_behavior(bid,request)
     behavior.delete()
@@ -230,6 +251,7 @@ def delete_behavior(request, bid):
 
 
 # Delete a question
+@login_required
 def delete_question(request, qid):
     question = get_question(qid,request)
     question.delete()
@@ -237,6 +259,7 @@ def delete_question(request, qid):
 
 
 # Delete a question, redirect to next
+@login_required
 def delete_question_redirect(request, qid):
     question = get_question(qid,request)
     next_question,previous_question = get_next_previous_question(question)
@@ -245,6 +268,7 @@ def delete_question_redirect(request, qid):
     return HttpResponseRedirect("%sedit" %next_question.get_absolute_url())
     
 # Edit all questions view
+@login_required
 def edit_questions(request, assessment_aid, message=1):
     from cogpheno.apps.assessments.models import BehavioralTrait, Question
     assessment = get_assessment(assessment_aid, request)
@@ -300,6 +324,7 @@ def get_questions(assessment):
 
 
 # Add a concept
+@login_required
 def add_concept(request,qid):
     if request.method == "POST":
         from cogpheno.apps.assessments.models import BehavioralTrait
