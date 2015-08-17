@@ -12,12 +12,18 @@ $('#delete_assessment').click(function(e) {
 <div class="row">
     <div class="col-lg-12">
         <div class='management-options'>
+            {% if question_permission %}
             <a class='btn btn-cogat' href='{% url 'edit_questions' aid %}'>Edit Questions</a>
-            <a class='btn btn-cogat' href='#'>Edit Assessment</a>
+            {% endif %}
+            {% if edit_permission %}
+            <a class='btn btn-cogat' href='{% url 'new_assessment' aid %}'>Edit Assessment</a>
+            {% endif %}
             <a class='btn btn-cogat' href='{% url 'export_assessment' aid %}'>Export Questions</a> 
+            {% if delete_permission %}
             <div class="float-right-wrapper">
                 <a class='btn btn-danger' href='{% url 'delete_assessment' aid %}' id="delete_assessment"> Delete Assessment</a>
             </div>
+            {% endif %}
       </div>
 </div>
 
@@ -54,7 +60,6 @@ $('#delete_assessment').click(function(e) {
                        <table class="table table-condensed table-striped table-hover" id="questions-table">
                          <thead>
                              <tr>
-                                 <th>Assessment</th>
                                  <th>Label</th>
                                  <th>Question Text</th>
                                  <th>Behavioral Trait</th>
@@ -67,8 +72,11 @@ $('#delete_assessment').click(function(e) {
                          <tbody>
                          {% for question in questions %}
                              <tr>
-                                 <td><a href='{% url 'assessment_details' question.assessment.id %}'>{{ question.assessment }}</a></td>
+                                 {% if question_permission %}
                                  <td><a href='{% url 'edit_question' question.id %}' id="edit_question">{{ question.label }}</a></td>
+                                 {% else %}
+                                 <td>{{ question.label }}</td>
+                                 {% endif %}
                                  <td>{{ question.text }}</td>
                                  <td>{{ question.behavioral_trait }}</td>
                                  <td>{{ question.direction }}</td>

@@ -13,7 +13,11 @@
       <tbody>
         {% for behavior in behaviors %}
           <tr>
+            {% if edit_behaviors %}
             <td><a href="/behaviors/{{ behavior.pk }}">{{ behavior.name }}</a></td>
+            {% else %}
+            <td>{{ behavior.name }}</td>
+            {% endif %}
             <td>{{ behavior.definition }}</td>
             <td>{{ behavior.wordnet_synset }}</td>
           </tr>

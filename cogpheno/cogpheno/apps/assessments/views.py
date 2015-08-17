@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from userroles import roles
 import uuid
 import json
 import csv
@@ -13,9 +14,40 @@ import csv
 ### AUTHENTICATION ####################################################
 
 def owner_or_contrib(request,assessment):
-    if assessment.owner == request.user or request.user in collection.contributors.all() or request.user.is_superuser:
-        return True
+    if not request.user.is_anonymous():
+        if owner_or_super(request,assessment) or request.user in assessment.contributors.all():
+            return True
     return False
+
+def owner_or_super(request,assessment):
+    if not request.user.is_anonymous():
+        if assessment.owner == request.user or request.user.is_superuser:
+            return True
+    return False
+
+def check_question_edit_permission(request, assessment):
+    if not request.user.is_anonymous():
+        if owner_or_contrib(request,assessment) or request.user.role == roles.question_editor:
+            return True
+    return False
+
+def check_behavior_edit_permission(request):
+    if not request.user.is_anonymous():
+        if request.user.is_superuser or request.user.role == roles.behavior_editor:
+            return True
+    return False
+
+def is_question_editor(request):
+    if not request.user.is_anonymous():   
+        if request.user.role == roles.question_editor or request.user.is_superuser:
+            return True
+    return False           
+
+def is_behavior_editor(request):
+    if not request.user.is_anonymous():   
+        if request.user.role == roles.behavior_editor or request.user.is_superuser:
+            return True
+    return False           
 
 
 #### GETS #############################################################
@@ -72,8 +104,17 @@ def get_next_previous_question(question):
 def view_assessment(request, aid):
     assessment = get_assessment(aid,request)
     questions = assessment.question_set.all()
+
+    # Determine permissions for edit and deletion
+    edit_permission = True if owner_or_contrib(request,assessment) else False
+    delete_permission = True if owner_or_super(request,assessment) else False
+    edit_question_permission = True if check_question_edit_permission(request,assessment) else False
+
     context = {'assessment': assessment,
                'questions': questions,
+               'edit_permission':edit_permission,
+               'delete_permission':delete_permission,
+               'question_permission':edit_question_permission,
                'aid':aid,
                'active':'assessments'}
 
@@ -113,16 +154,20 @@ def assessments_view(request):
 # All questions
 def questions_view(request):
     questions = Question.objects.all()
+    edit_question_permission = True if is_question_editor(request) else False
     context = {'questions': questions,
-               'active':'questions'}
+               'active':'questions',
+               'edit_questions':edit_question_permission}
     return render(request, 'all_questions.html', context)
 
 
 # All behavior
 def behaviors_view(request):
     behaviors = BehavioralTrait.objects.all()
+    edit_behavior_permission = True if is_behavior_editor(request) else False
     context = {'behaviors': behaviors,
-               'active':'behaviors'}
+               'active':'behaviors',
+               'edit_behaviors':edit_behavior_permission}
     return render(request, 'all_behaviors.html', context)
 
 
@@ -140,6 +185,7 @@ def edit_assessment(request,aid=None):
 
     if not owner_or_contrib(request,assessment):
         return HttpResponseForbidden()
+
     if request.method == "POST":
         form = AssessmentForm(request.POST, instance=assessment)
 
@@ -163,6 +209,10 @@ def edit_assessment(request,aid=None):
 def edit_behavior(request, bid):
     
     behavior = get_behavior(bid,request)
+    edit_permission = check_behavior_edit_permission(request)
+
+    if not edit_permission:
+        return HttpResponseForbidden()
 
     if request.method == "POST":
         from textblob import Word
@@ -172,6 +222,7 @@ def edit_behavior(request, bid):
         behavior.save()
         context = {
                 'behavior': behavior,
+                'edit_permission': edit_permission
         }
         return HttpResponseRedirect(behavior.get_absolute_url())
     else:
@@ -191,19 +242,16 @@ def edit_question(request,qid=None):
     next_question = None
     previous_question = None
 
-    # Check if the user owns the assessment
-    #if not owner_or_contrib(request,assessment):
-    #    return HttpResponseForbidden()
-
-
     # Editing an existing question
     if qid:
         question = get_question(qid,request)
         page_header = 'Edit question'
         next_question,previous_question = get_next_previous_question(question)
- 
     else:
         question = Question()
+
+    if not owner_or_contrib(request,question.assessment):
+        return HttpResponseForbidden()
 
     if request.method == "POST":
         form = QuestionForm(request.POST, instance=question)
@@ -238,41 +286,51 @@ def edit_question(request,qid=None):
 @login_required
 def delete_assessment(request, aid):
     assessment = get_assessment(aid,request)
-    assessment.delete()
-    return redirect('assessments')
-
+    if request.user.owner == assessment.owner:
+        assessment.delete()
+        return redirect('assessments')
+    return HttpResponseForbidden()
 
 # Delete a behavior
 @login_required
 def delete_behavior(request, bid):
-    behavior = get_behavior(bid,request)
-    behavior.delete()
-    return redirect('behaviors')
-
+    if request.user.is_superuser:
+        behavior = get_behavior(bid,request)
+        behavior.delete()
+        return redirect('behaviors')
+    return HttpResponseForbidden()
 
 # Delete a question
 @login_required
 def delete_question(request, qid):
     question = get_question(qid,request)
-    question.delete()
-    return redirect('questions')
-
+    if owner_or_contrib(request,question.assessment):
+        question.delete()
+        return redirect('questions')
+    return HttpResponseForbidden()
 
 # Delete a question, redirect to next
 @login_required
 def delete_question_redirect(request, qid):
     question = get_question(qid,request)
     next_question,previous_question = get_next_previous_question(question)
-    question.delete()
-    next_question = get_question(next_question,request)
-    return HttpResponseRedirect("%sedit" %next_question.get_absolute_url())
-    
+    if owner_or_contrib(request,question.assessment):
+        question.delete()
+        next_question = get_question(next_question,request)
+        return HttpResponseRedirect("%sedit" %next_question.get_absolute_url())
+    return HttpResponseForbidden()
+
 # Edit all questions view
 @login_required
 def edit_questions(request, assessment_aid, message=1):
     from cogpheno.apps.assessments.models import BehavioralTrait, Question
     assessment = get_assessment(assessment_aid, request)
 
+    # Determine permissions for edit and deletion
+    edit_permission = True if owner_or_contrib(request,assessment) else False
+    if not edit_permission:
+        return HttpResponseForbidden()
+  
     # Get all behavioral traits
     traits = BehavioralTrait.objects.all()
     behavioral_traits = [trait.name for trait in traits]
@@ -326,6 +384,9 @@ def get_questions(assessment):
 # Add a concept
 @login_required
 def add_concept(request,qid):
+    if not is_behavior_editor(request):
+        return HttpResponseForbidden()
+
     if request.method == "POST":
         from cogpheno.apps.assessments.models import BehavioralTrait
         # Add the new concept

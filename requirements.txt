@@ -1,6 +1,7 @@
 Django
 django-crispy-forms
 python-social-auth
+django-user-roles
 requests>=2.5.1
 requests-oauthlib
 numpy

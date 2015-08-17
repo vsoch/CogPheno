@@ -48,6 +48,15 @@ INSTALLED_APPS = (
     'crispy_forms',
 )
 
+# User Functions
+
+USER_ROLES = (
+    'question_editor',
+    'assessment_editor',
+    'behavior_editor'
+)
+
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'social.backends.facebook.FacebookOAuth2',

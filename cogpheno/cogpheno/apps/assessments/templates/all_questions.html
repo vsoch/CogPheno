@@ -17,7 +17,11 @@
         {% for question in questions %}
           <tr>
             <td><a href='{% url 'assessment_details' question.assessment.id %}'>{{ question.assessment.name }}</a></td>
+            {% if edit_questions %}
             <td><a href='{% url 'edit_question' question.id %}' id="edit_question">{{ question.label }}</a></td>
+            {% else %}
+            <td>{{ question.label }}</td>
+            {% endif %}
             <td>{{ question.text }}</td>
             <td>{{ question.behavioral_trait }}</td>
             <td>{{ question.required }}</td>
