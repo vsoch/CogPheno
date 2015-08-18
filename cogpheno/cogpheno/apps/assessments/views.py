@@ -27,25 +27,33 @@ def owner_or_super(request,assessment):
 
 def check_question_edit_permission(request, assessment):
     if not request.user.is_anonymous():
-        if owner_or_contrib(request,assessment) or request.user.role == roles.question_editor:
+        if owner_or_contrib(request,assessment):
+            return True
+        elif request.user.role == roles.question_editor:
             return True
     return False
 
 def check_behavior_edit_permission(request):
     if not request.user.is_anonymous():
-        if request.user.is_superuser or request.user.role == roles.behavior_editor:
+        if request.user.is_superuser:
+            return True
+        elif request.user.role == roles.behavior_editor:
             return True
     return False
 
 def is_question_editor(request):
     if not request.user.is_anonymous():   
-        if request.user.role == roles.question_editor or request.user.is_superuser:
+        if request.user.is_superuser:
+            return True
+        elif request.user.role == roles.question_editor:
             return True
     return False           
 
 def is_behavior_editor(request):
+    if request.user.is_superuser:
+        return True
     if not request.user.is_anonymous():   
-        if request.user.role == roles.behavior_editor or request.user.is_superuser:
+        if request.user.role == roles.behavior_editor:
             return True
     return False           
 
@@ -204,10 +212,10 @@ def edit_assessment(request,aid=None):
     return render(request, "edit_assessment.html", context)
 
 
-# Edit a behavior
+# Edit a behavior from the behavior view
 @login_required
 def edit_behavior(request, bid):
-    
+        
     behavior = get_behavior(bid,request)
     edit_permission = check_behavior_edit_permission(request)
 
@@ -226,13 +234,117 @@ def edit_behavior(request, bid):
         }
         return HttpResponseRedirect(behavior.get_absolute_url())
     else:
-        form =  BehaviorForm(instance=behavior)
+        behaviorform =  BehaviorForm(instance=behavior)
 
-    context = {"form": form, 
+    # Get questions that behavior is tagged for
+    tagged_questions = Question.objects.filter(behavioral_trait=behavior)
+
+    context = {"behaviorform": behaviorform, 
                "active":"behaviors",
-               "behavior":behavior}
+               "behavior":behavior,
+               "questions":tagged_questions}
 
     return render(request,'edit_behavior.html', context)
+
+# Add a new behavior for a question
+# Edit a single question
+@login_required
+def edit_question(request,qid=None):
+
+    page_header = "Add new question"
+    next_question = None
+    previous_question = None
+
+    # Editing an existing question
+    if qid:
+        question = get_question(qid,request)
+        page_header = 'Edit question'
+        next_question,previous_question = get_next_previous_question(question)
+    else:
+        question = Question()
+
+    if not owner_or_contrib(request,question.assessment):
+        return HttpResponseForbidden()
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.save()
+
+            context = {
+                'question': question,
+                "active":"questions",
+                "page_header":page_header
+            }
+            return HttpResponseRedirect(question.get_absolute_url())
+    else:
+        form = QuestionForm(instance=question)
+
+    # If the user wants to add a concept
+    addconceptform = AddConceptForm()
+
+    context = {"form": form, 
+               "page_header": page_header,
+               "active":"questions",
+               "next_question": next_question,
+               "previous_question" : previous_question,
+               "question": question,
+               "addconceptform" : addconceptform}
+
+    return render(request, "edit_question.html", context)
+
+
+# Edit the behavior associated with a question (from question view)
+@login_required
+def edit_behavior_question(request,qid):
+
+    # Editing an existing question
+    question = get_question(qid,request)
+    behavior = question.behavioral_trait
+    page_header = 'Edit question'
+    next_question,previous_question = get_next_previous_question(question)
+
+    # Check if allowed to edit assessment, and then behaviors
+    if not owner_or_contrib(request,question.assessment):
+        return HttpResponseForbidden()
+    edit_permission = check_behavior_edit_permission(request)
+    if not edit_permission:
+        return HttpResponseForbidden()
+
+    context = {"page_header": page_header,
+               "active":"questions",
+               "next_question": next_question,
+               "previous_question" : previous_question,
+               "addconceptform" : AddConceptForm()}
+
+    # If posting, updating question and behavior, return to question
+    if request.method == "POST":
+        # First save the new behavior
+        from textblob import Word
+        behavior.name = request.POST.get("name", "")
+        behavior.wordnet_synset = request.POST.get("synset", "")
+        behavior.definition = request.POST.get("definition", "")
+        behavior.save()
+        context = {
+            'question': question,
+            "active":"questions",
+            "page_header":page_header
+        }
+        # Now update the question with the behavior
+        question.behavioral_trait = behavior
+        question.save()
+
+    # If not, return edit question page showing edit behavior modal
+    else:
+        context["behaviorform"] = BehaviorForm(instance=behavior) 
+        context["questions"] = Question.objects.filter(behavioral_trait=behavior)
+
+    context["question"] = question
+    context["form"] = QuestionForm(instance=question)
+    
+    return render(request, "edit_question.html", context)
 
 # Edit a single question
 @login_required
@@ -384,8 +496,9 @@ def get_questions(assessment):
 # Add a concept
 @login_required
 def add_concept(request,qid):
-    if not is_behavior_editor(request):
-        return HttpResponseForbidden()
+    if not request.user.is_superuser:
+        if not is_behavior_editor(request):
+            return HttpResponseForbidden()
 
     if request.method == "POST":
         from cogpheno.apps.assessments.models import BehavioralTrait
@@ -435,11 +548,13 @@ def export_assessments(assessments,output_name):
 
     for assessment in assessments:
         for question in assessment.question_set.all():
-            if question.behavioral_trait == None:
-                synset = "None"
-            else:
-                synset = question.behavioral_trait.wordnet_synset
-            writer.writerow([assessment.name,
+            # For now skip over questions with any bugs
+            try:
+                if question.behavioral_trait == None:
+                    synset = "None"
+                else:
+                    synset = question.behavioral_trait.wordnet_synset
+                writer.writerow([assessment.name,
                          len(assessment.question_set.all()),
                          assessment.version,
                          question.label,
@@ -451,5 +566,7 @@ def export_assessments(assessments,output_name):
                          question.id,
                          question.data_type,
                          question.options.replace("\t"," ").replace(",","|").replace(";","|")])
+            except:
+                pass
 
     return response

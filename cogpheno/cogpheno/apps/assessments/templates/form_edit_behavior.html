@@ -1,0 +1,44 @@
+{% csrf_token %}
+
+<!-- IMPORTANT: form opening tags are rendered in page-->
+<div class="form-group">
+    <label for="name">Name:</label>
+    {{ behaviorform.name }}
+</div>
+<div class="form-group">
+    <label for="synset">Definition:</label>
+    <select id="synset" name="synset" class="synset_input form-control" style="width:600px">
+        {% for choice in behaviorform.synset.field.choices %}
+        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+        {% endfor %}
+    <input type="hidden" name="definition" id="definition">
+    </select>
+
+    <!--Remind user of other questions that are tagged -->
+    <div style="padding:20px">
+        <h2>All Tagged Questions</h2>
+        <div class="alert alert-warning" role="alert" style="height:30px;padding-top:4px">
+         Warning: changing a term or definition will effect all of the questions below.</div>
+        {% include "table_questions.html" %}
+    </div>
+</div>
+
+<input id='submit' type='submit' class="btn btn-primary btn-small" name=submit'></input>
+</form> <!-- IMPORTANT: form opening tag is rendered in page-->
+
+<script>
+$(document).ready(function() {
+$(".synset_input").select2();
+
+// In case the user wants the first and doesn't select a different one
+var definition = $('#synset').find(":selected").text();
+$("#definition")[0].value = definition
+
+$("#synset").change(function() {
+  var definition = $('#synset').find(":selected").text();
+  $("#definition")[0].value = definition
+});
+
+});
+
+</script>

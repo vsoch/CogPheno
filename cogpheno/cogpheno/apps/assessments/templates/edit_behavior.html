@@ -8,41 +8,10 @@
 {% endblock %}
 {% block content %}
 
-<script>
-$(document).ready(function() {
-  $(".synset_input").select2();
-
-// In case the user wants the first and doesn't select a different one
-var definition = $('#synset').find(":selected").text();
-$("#definition")[0].value = definition
-
-$("#synset").change(function() {
-  var definition = $('#synset').find(":selected").text();
-  $("#definition")[0].value = definition
-});
-
-
-});
-
-</script>
 <form action='edit_behavior' method='POST' enctype='multipart/form-data' class="form-horizontal">
+
         {% csrf_token %}
+        {% include "form_edit_behavior.html" %}              
+<!-- IMPORTANT: form closing tag is rendered in template above-->
 
-        <div class="form-group">
-            <label for="name">Name:</label>
-            {{ form.name }}
-        </div>
-
-        <div class="form-group">
-            <label for="synset">Definition:</label>
-            <select id="synset" name="synset" class="synset_input form-control" style="width:600px">
-            {% for choice in form.synset.field.choices %}
-            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-            {% endfor %}
-            <input type="hidden" name="definition" id="definition">
-            </select>
-        </div>
-
-        <input id='submit' type='submit' class="btn btn-primary btn-small" name=submit'></input>
-</form>
 {% endblock %}

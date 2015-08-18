@@ -78,3 +78,18 @@ body {
   margin-top: 30px;
   margin-left: 30%;
 }
+
+/* Modals */
+
+.behavioral-modal-content {
+    width: 800px;
+    padding-left: 20px;
+}
+
+.behavioral-modal-dialog {
+    width: 800px;
+}
+
+#editbehavior {
+    padding-top: 100px;
+}

@@ -1,0 +1,36 @@
+<table class="table table-condensed table-striped table-hover" id="questions-table">
+        <thead>
+        <tr>
+          <th>Assessment</th>
+          <th>Label</th>
+          <th>Question Text</th>
+          <th>Behavioral Trait</th>
+          <th>Required</th>
+          <th>Data Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for question in questions %}
+          <tr>
+            <td><a href='{% url 'assessment_details' question.assessment.id %}'>{{ question.assessment.name }}</a></td>
+            {% if edit_questions %}
+            <td><a href='{% url 'edit_question' question.id %}' id="edit_question">{{ question.label }}</a></td>
+            {% else %}
+            <td>{{ question.label }}</td>
+            {% endif %}
+            <td>{{ question.text }}</td>
+            <td>{{ question.behavioral_trait }}</td>
+            <td>{{ question.required }}</td>
+            <td>{{ question.data_type }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+</table>
+    
+<script>
+$(document).ready(function() {
+    $('#questions-table').dataTable({
+       responsive: true
+    });
+});
+</script>

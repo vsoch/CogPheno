@@ -10,10 +10,10 @@ class BehavioralTrait(models.Model):
     wordnet_synset = models.CharField(max_length=200, null=True, blank=True,default=None)   
 
     def __str__(self):
-        return self.name
+        return "%s: %s" %(self.name,self.definition)
     
     def __unicode__(self):
-        return self.name
+        return "%s: %s" %(self.name,self.definition)
     
     class Meta:
         ordering = ['name']
