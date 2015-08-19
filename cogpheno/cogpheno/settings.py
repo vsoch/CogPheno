@@ -44,11 +44,11 @@ INSTALLED_APPS = (
 )
 
 # User Functions
-
 USER_ROLES = (
     'question_editor',
     'assessment_editor',
-    'behavior_editor'
+    'behavior_editor',
+    'viewer'
 )
 
 

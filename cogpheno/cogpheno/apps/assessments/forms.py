@@ -42,6 +42,8 @@ class BehaviorForm(ModelForm):
 
     class Meta:
         model = BehavioralTrait
+        fields = ("name","definition","wordnet_synset")
+        
 
     def clean(self):
         cleaned_data = super(BehaviorForm, self).clean()

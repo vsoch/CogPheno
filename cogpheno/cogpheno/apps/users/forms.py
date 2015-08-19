@@ -6,7 +6,6 @@ from crispy_forms.helper import FormHelper
 from django import forms
 
 
-
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)
 

@@ -6,7 +6,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from userroles import roles
 import uuid
 import json
 import csv
@@ -29,15 +28,11 @@ def check_question_edit_permission(request, assessment):
     if not request.user.is_anonymous():
         if owner_or_contrib(request,assessment):
             return True
-        elif request.user.role == roles.question_editor:
-            return True
     return False
 
 def check_behavior_edit_permission(request):
     if not request.user.is_anonymous():
         if request.user.is_superuser:
-            return True
-        elif request.user.role == roles.behavior_editor:
             return True
     return False
 
@@ -45,16 +40,11 @@ def is_question_editor(request):
     if not request.user.is_anonymous():   
         if request.user.is_superuser:
             return True
-        elif request.user.role == roles.question_editor:
-            return True
     return False           
 
 def is_behavior_editor(request):
     if request.user.is_superuser:
         return True
-    if not request.user.is_anonymous():   
-        if request.user.role == roles.behavior_editor:
-            return True
     return False           
 
 
