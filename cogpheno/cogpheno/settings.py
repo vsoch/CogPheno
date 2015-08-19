@@ -21,8 +21,11 @@ MANAGERS = ADMINS
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'kykz2ht_9sxu=)+axxu01hd^)dgqvj=+nk!-%^9chzar$koxug'
+# Bogus secret key.
+try:
+    from secrets import *
+except ImportError:
+    from bogus_secrets import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
