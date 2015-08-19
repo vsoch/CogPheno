@@ -18,19 +18,11 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
-# Bogus secret key.
-try:
-    from secrets import *
-except ImportError:
-    from bogus_secrets import *
+DEBUG = False
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -110,13 +102,24 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 WSGI_APPLICATION = 'cogpheno.wsgi.application'
 
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'cogpheno.db'),
+#    }
+#}
+
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'cogpheno.db'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'cogpheno',
+        'USER': 'cogpheno',
+        'PASSWORD': 'cogpheno',
+        'HOST': '',
+        'PORT': '5432',
     }
 }
 
@@ -158,3 +161,18 @@ TEMPLATE_LOADERS = (
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# Bogus secret key.
+try:
+    from secrets import *
+except ImportError:
+    from bogus_secrets import *
+
+# Local settings
+try:
+    from local_settings import *
+except ImportError:
+    pass

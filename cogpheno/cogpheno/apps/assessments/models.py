@@ -38,9 +38,9 @@ class CognitiveAtlasTask(models.Model):
         ordering = ['name']
 
 class CognitiveAtlasConcept(models.Model):
-    name = models.CharField(max_length=200, null=False, blank=False)
+    name = models.CharField(max_length=1000, null=False, blank=False)
     cog_atlas_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
-    definition = models.CharField(max_length=200, null=False, blank=False,default=None)
+    definition = models.CharField(max_length=5000, null=False, blank=False,default=None)
     
     def __str__(self):
         return self.name
