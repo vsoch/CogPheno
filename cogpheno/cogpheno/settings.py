@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'cogpheno.apps.users',
     'social.apps.django_app.default',
     'crispy_forms',
+    'dbbackup'
 )
 
 # User Functions

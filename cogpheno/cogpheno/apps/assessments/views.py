@@ -288,20 +288,13 @@ def edit_question(request,qid=None):
 
 # Edit the behavior associated with a question (from question view)
 @login_required
-def edit_behavior_question(request,qid):
+def view_behavior_question(request,qid):
 
     # Editing an existing question
     question = get_question(qid,request)
     behavior = question.behavioral_trait
-    page_header = 'Edit question'
+    page_header = 'View question'
     next_question,previous_question = get_next_previous_question(question)
-
-    # Check if allowed to edit assessment, and then behaviors
-    if not owner_or_contrib(request,question.assessment):
-        return HttpResponseForbidden()
-    edit_permission = check_behavior_edit_permission(request)
-    if not edit_permission:
-        return HttpResponseForbidden()
 
     context = {"page_header": page_header,
                "active":"questions",
@@ -309,28 +302,9 @@ def edit_behavior_question(request,qid):
                "previous_question" : previous_question,
                "addconceptform" : AddConceptForm()}
 
-    # If posting, updating question and behavior, return to question
-    if request.method == "POST":
-        # First save the new behavior
-        from textblob import Word
-        behavior.name = request.POST.get("name", "")
-        behavior.wordnet_synset = request.POST.get("synset", "")
-        behavior.definition = request.POST.get("definition", "")
-        behavior.save()
-        context = {
-            'question': question,
-            "active":"questions",
-            "page_header":page_header
-        }
-        # Now update the question with the behavior
-        question.behavioral_trait = behavior
-        question.save()
-
-    # If not, return edit question page showing edit behavior modal
-    else:
-        context["behaviorform"] = BehaviorForm(instance=behavior) 
-        context["questions"] = Question.objects.filter(behavioral_trait=behavior)
-
+    # Return edit question page showing edit behavior modal
+    context["behaviorform"] = True 
+    context["questions"] = Question.objects.filter(behavioral_trait=behavior)
     context["question"] = question
     context["form"] = QuestionForm(instance=question)
     
@@ -494,10 +468,28 @@ def add_concept(request,qid):
         from cogpheno.apps.assessments.models import BehavioralTrait
         # Add the new concept
         new_concept = request.POST["new_concept"]
-        concept = BehavioralTrait(unique_id=str(uuid.uuid4()),name=new_concept,definition="")
-        concept.save()
+        make_new_concept(new_concept)
     question = get_question(qid,request)
     return HttpResponseRedirect("%sedit" %question.get_absolute_url())
+
+def make_new_concept(name):
+    from cogpheno.apps.assessments.models import BehavioralTrait
+    from textblob import Word
+    name = name.strip(" ")
+    terms = [term.name for term in BehavioralTrait.objects.all()]
+    if name not in terms:
+        word = Word(name)
+        syns = word.get_synsets()
+        if syns:
+            for syn in syns:
+                concept = BehavioralTrait(unique_id=str(uuid.uuid4()),
+                                          name=name,
+                                          definition=syn.definition(),
+                                          wordnet_synset=syn.name())
+                concept.save()
+        else:
+            concept = BehavioralTrait(unique_id=str(uuid.uuid4()),name=name,definition="") 
+            concept.save()
 
 #### EXPORT #############################################################
 
