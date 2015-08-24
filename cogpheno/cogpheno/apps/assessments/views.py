@@ -485,10 +485,11 @@ def make_new_concept(name):
                 concept = BehavioralTrait(unique_id=str(uuid.uuid4()),
                                           name=name,
                                           definition=syn.definition(),
-                                          wordnet_synset=syn.name())
+                                          wordnet_synset=syn.name(),
+                                          pos=syn.pos())
                 concept.save()
         else:
-            concept = BehavioralTrait(unique_id=str(uuid.uuid4()),name=name,definition="") 
+            concept = BehavioralTrait(unique_id=str(uuid.uuid4()),name=name,definition="",pos="") 
             concept.save()
 
 #### EXPORT #############################################################

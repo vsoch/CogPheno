@@ -8,12 +8,13 @@ class BehavioralTrait(models.Model):
     unique_id = models.CharField(primary_key=True, max_length=200, null=False, blank=False)
     definition = models.CharField(max_length=1000, null=True, blank=True,default=None)
     wordnet_synset = models.CharField(max_length=200, null=True, blank=True,default=None)   
+    pos = models.CharField(max_length=10, null=True, blank=True,default=None)   
 
     def __str__(self):
-        return "%s: %s" %(self.name,self.definition)
+        return "%s: %s (%s)" %(self.name,self.definition,self.pos)
     
     def __unicode__(self):
-        return "%s: %s" %(self.name,self.definition)
+        return "%s: %s (%s)" %(self.name,self.definition,self.pos)
     
     class Meta:
         ordering = ['name']
