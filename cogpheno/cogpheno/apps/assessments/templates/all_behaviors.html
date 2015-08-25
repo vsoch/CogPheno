@@ -8,6 +8,7 @@
           <th>Behavior</th>
           <th>Definition</th>
           <th>Synset</th>
+          <th>Part of Speech</th>
         </tr>
       </thead>
       <tbody>
@@ -20,6 +21,7 @@
             {% endif %}
             <td>{{ behavior.definition }}</td>
             <td>{{ behavior.wordnet_synset }}</td>
+            <td>{{ behavior.pos }}</td>
           </tr>
         {% endfor %}
       </tbody>

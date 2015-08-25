@@ -47,7 +47,7 @@
     });
 
     // Append a button to add a concept
-    $("#hint_id_behavioral_trait").after($('<div class="float-right-wrapper"><a class="btn btn-primary" onclick="edit_behavior()" style="margin-right:5px">Edit Behavior</a><a class="btn btn-primary" onclick="new_behavior()">New Behavior</a></div>')); 
+    $("#hint_id_behavioral_trait").after($('<div class="float-right-wrapper"><a class="btn btn-primary" onclick="view_behavior()" style="margin-right:5px">View Behavior Questions</a><a class="btn btn-primary" onclick="new_behavior()">New Behavior</a></div>')); 
 
     // Submit form on enter
     $(document).keypress(function(event){
@@ -63,8 +63,8 @@
     }
 
     // Edit behavior
-    function edit_behavior() {
-        document.location = "{% url 'edit_behavior_question' question.id %}"
+    function view_behavior() {
+        document.location = "{% url 'view_behavior_question' question.id %}"
     }
    
     // Close modal
@@ -110,13 +110,14 @@
         <div class="modal-content behavioral-modal-content">
             <div class="modal-header">
                 <button type="button" class="close" onclick="closeModal()">&times;</button>
-                <h4 class="modal-title">Edit behavioral concept</h4>
+                <h4 class="modal-title">View behavioral questions</h4>
             </div>
             <div class="modal-body">
-            <form action='behavior' method='POST' enctype='multipart/form-data' class="form-horizontal">
 
-            {% include "form_edit_behavior.html" %}            
-            <!-- IMPORTANT: form closing tag is rendered in page-->
+                <div style="padding:20px">
+                    <h2>All Tagged Questions</h2>
+                    {% include "table_questions.html" %}
+                </div>
             
             </div>
             <div class="modal-footer">

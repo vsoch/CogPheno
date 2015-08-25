@@ -12,7 +12,7 @@ $('#delete_behavior').click(function(e) {
 <div class="row">
     <div class="col-lg-12">
         <div class='management-options'>
-            <a class='btn btn-cogat' href='{% url 'edit_behavior' bid %}' id="edit_behavior">Edit Behavior</a>
+            <a class='btn btn-cogat' href='{% url 'edit_behavior' bid %}' id="edit_behavior">Questions</a>
             <div class="float-right-wrapper">
                 <a class='btn btn-danger' href='{% url 'delete_behavior' bid %}' id="delete_behavior"> Delete Behavior</a>
             </div>
@@ -39,6 +39,7 @@ $('#delete_behavior').click(function(e) {
                      <tbody>
                          <tr><td>Behavior Name</td><td>{{ behavior.name }}</td></tr>
                          <tr><td>WordNet Synset</td><td>{{ behavior.wordnet_synset }}</td></tr>
+                         <tr><td>Part of Speech</td><td>{{ behavior.pos }}</td></tr>
                          <tr><td>Unique ID</td><td>{{ bid }}</td></tr>
                          <tr><td>Definition</td><td>{{ behavior.definition }}</td></tr>
                      </tbody>

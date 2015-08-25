@@ -7,14 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('assessments', '0008_add_assessment_users'),
+        ('assessments', '0001_initial'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='cognitiveatlasconcept',
-            name='name',
-            field=models.CharField(max_length=1000),
+        migrations.AddField(
+            model_name='behavioraltrait',
+            name='pos',
+            field=models.CharField(default=None, max_length=10, null=True, blank=True),
             preserve_default=True,
         ),
     ]

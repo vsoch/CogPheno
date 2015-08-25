@@ -8,10 +8,10 @@
 {% endblock %}
 {% block content %}
 
-<form action='edit_behavior' method='POST' enctype='multipart/form-data' class="form-horizontal">
+    <div style="padding:20px">
+        <h2>All Tagged Questions</h2>
+        {% include "table_questions.html" %}
+    </div>
 
-        {% csrf_token %}
-        {% include "form_edit_behavior.html" %}              
-<!-- IMPORTANT: form closing tag is rendered in template above-->
 
 {% endblock %}
