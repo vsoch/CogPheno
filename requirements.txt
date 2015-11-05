@@ -11,5 +11,6 @@ requests-oauthlib==0.5.0
 textblob
 psycopg2
 nltk
+boto==2.1.1
 cognitiveatlas
 dropbox
