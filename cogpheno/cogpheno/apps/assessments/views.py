@@ -6,9 +6,11 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from cogpheno.apps.assessments.utils import get_synsets
 import uuid
 import json
 import csv
+import os
 
 ### AUTHENTICATION ####################################################
 
@@ -474,12 +476,10 @@ def add_concept(request,qid):
 
 def make_new_concept(name):
     from cogpheno.apps.assessments.models import BehavioralTrait
-    from textblob import Word
     name = name.strip(" ")
     terms = [term.name for term in BehavioralTrait.objects.all()]
     if name not in terms:
-        word = Word(name)
-        syns = word.get_synsets()
+        syns = get_synsets(name)
         if syns:
             for syn in syns:
                 concept = BehavioralTrait(unique_id=str(uuid.uuid4()),

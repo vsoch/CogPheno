@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cogpheno.apps.main',
+    'cogpheno.apps.turk',
     'cogpheno.apps.assessments',
     'cogpheno.apps.users',
     'social.apps.django_app.default',

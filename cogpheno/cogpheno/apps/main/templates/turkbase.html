@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}CogPheno: Cognitive Atlas Phenotype{% endblock %}</title>
+    {% block includes %}{% endblock %}
+    {% block global_includes %}
+    <link href="{% static "css/app.css"%}" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{% static "css/style.css"%}" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{% static "css/form-elements.css"%}" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{% static "css/turkstyle.css"%}" media="screen" rel="stylesheet" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{% static "css/dataTables.responsive.css"%}" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+
+    {% endblock %}
+    {% block head %}{% endblock %}
+	{% block functions %}{% endblock %}
+</head>
+{% block body %}
+  <body class='main page'>
+    <!-- Navbar -->
+    <div class='navbar' id='navbar'>
+      <a class='navbar-brand' href="{% url 'index' %}">
+        <span style="color:#1abc9c">cogat</span>pheno
+      </a>
+      <ul class='nav navbar-nav pull-right'>
+      <!-- Auth is removed from turk view-->
+      </ul>
+    </div>
+    <div id='wrapper'>
+      <!-- Sidebar -->
+      <section id='sidebar'>
+        <i class='icon-align-justify icon-large' id='toggle'></i>
+        <div data-toggle='tooltip' id='beaker' title='Made by Poldracklab'></div>
+      </section>
+      <!-- Tools -->
+      <section id='tools'>
+        <ul class='breadcrumb' id='breadcrumb'>
+          {% if question_title %}
+          <li class='title'>{{ question_title }}</li>
+          {% else %}
+          <li class='title'>Question Annotation Portal</li>
+          {% endif %}
+        </ul>
+      </section>
+      <!-- Content -->
+      <div id='content'>
+            {% block content %}{% endblock %}
+      </div>
+    </div>
+  </body>
+
+    <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="{% static "js/retina-1.1.0.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/formscripts.js" %}" type="text/javascript"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.js"></script>
+    <script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js" type="text/javascript"></script>
+    <script src="{% static "js/app.js"%}" type="text/javascript"></script>
+
+
+{% endblock %}
+</html>
