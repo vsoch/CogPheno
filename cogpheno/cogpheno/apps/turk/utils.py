@@ -56,7 +56,7 @@ def get_host():
         if "debug" in settings.TURK:
             if settings.TURK["debug"] == 1:
                 if "sandbox_host" in settings.TURK:                
-                    host = settings.TURK["debug"]
+                    host = settings.TURK["sandbox_host"]
             else:
                 if 'host' in settings.TURK:
                     host = settings.TURK['host']
@@ -185,8 +185,8 @@ def get_app_url():
 def make_hit(title,description,keywords,amount=0.0,frame_height=800,number_hits=60):
     """make_hit
     make a set of hits to send to Amazon
-    """"
-
+    """
+ 
     connection = get_connection()
     url = get_app_url()
 
@@ -211,7 +211,7 @@ def save_worker(worker_id):
     """
     We need to keep track of worker's we've already seen
     """
-
+    return "WRITEME"
 
 def get_worker_ids_past_tasks():
-
+    return "WRITE ME"

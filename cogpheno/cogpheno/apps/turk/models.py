@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models.signals import pre_init
 
 from cogpheno.apps.turk.utils import amazon_string_to_datetime, get_connection
-from cogpheno.apps.assessments import Question
+from cogpheno.apps.assessments.models import Question
 
 def init_connection_callback(sender, **signal_args):
     """Mechanical Turk connection signal callback
@@ -41,10 +41,10 @@ class Worker(models.Model):
     questions = models.ManyToManyField(Question,related_name="questions_answered",related_query_name="questions", blank=True,help_text="These are questions that have been granted to a worker.",verbose_name="Worker questions")
 
     def __str__(self):
-        return "%s: questions[%s]" %(self.worker_id,len(self.questions)
+        return "%s: questions[%s]" %(self.worker_id,self.questions.count())
     
     def __unicode__(self):
-        return "%s: questions[%s]" %(self.worker_id,len(self.questions)
+        return "%s: questions[%s]" %(self.worker_id,self.questions.count())
     
     class Meta:
         ordering = ['worker_id']

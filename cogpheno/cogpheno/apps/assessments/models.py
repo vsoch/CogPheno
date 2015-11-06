@@ -93,6 +93,8 @@ class Question(models.Model):
                                           ("negative", 'Negative (inverse relationship)')),
                                           default="positive",verbose_name="Directionality",
                                           max_length=10)
+    flagged_for_curation = models.BooleanField(choices=((True, 'Curate'),(False, "Don't Curate")),
+                                                         default=True,verbose_name="Flagged for curation in with Amazon Mechanical Turk") 
  
     data_type = models.CharField(
                     help_text=("Data type of the question answer"),
