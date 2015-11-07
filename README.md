@@ -1,8 +1,8 @@
 ### Cognitive Atlas Phenotype
 
-This project aims to tag individual assessment questions (with tasks defined from the Cognitive Atlas) with behavioral traits (with a set of behavioral trait descriptors developed by me).
+This project aims to tag individual assessment questions (with behavioral terms defined with WordNet) toward the goal of developing an automated ontology of behavior. 
 
-![cogatpheno](cogpheno/cogpheno/apps/assessments/static/img/assessments.png)
+![cogatpheno](cogpheno/apps/assessments/static/img/assessments.png)
 
 #### Overview
 
