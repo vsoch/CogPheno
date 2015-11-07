@@ -1,4 +1,5 @@
 #!/bin/bash
+python scripts/setup_nltk.py
 python manage.py makemigrations
 python manage.py migrate
 python manage.py collectstatic --noinput
