@@ -1,4 +1,4 @@
-### Cognitive Atlas Phenotype
+### Cognitive Phenotype
 
 This project aims to tag individual assessment questions (with behavioral terms defined with WordNet) toward the goal of developing an automated ontology of behavior. 
 
