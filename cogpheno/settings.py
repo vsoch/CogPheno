@@ -10,10 +10,17 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+from datetime import timedelta
+import matplotlib
+import tempfile
+from kombu import Exchange, Queue
+matplotlib.use('Agg')
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ADMINS = (
-    (('VSochat', 'vsochat@gmail.com'))
+    (('vsochat', 'vsochat@gmail.com'))
 )
 
 MANAGERS = ADMINS
@@ -26,6 +33,19 @@ TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
+# Database
+# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        # The following settings are not used with sqlite3:
+        'USER': 'postgres',
+        'HOST': 'db',        
+        'PORT': '5432',      
+    }
+}
 
 # Application definition
 
@@ -42,7 +62,8 @@ INSTALLED_APPS = (
     'cogpheno.apps.users',
     'social.apps.django_app.default',
     'crispy_forms',
-    'dbbackup'
+    'dbbackup',
+    'djrill'
 )
 
 # User Functions
@@ -104,46 +125,22 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 WSGI_APPLICATION = 'cogpheno.wsgi.application'
 
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'cogpheno.db'),
-#    }
-#}
-
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cogpheno',
-        'USER': 'cogpheno',
-        'PASSWORD': 'cogpheno',
-        'HOST': '',
-        'PORT': '5432',
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
+SITE_ID = 1
+ANONYMOUS_USER_ID = -1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
-
+STATIC_ROOT = '/var/www/static/'
 STATIC_URL = '/static/'
 
 # List of finder classes that know how to find static files in
@@ -162,7 +159,21 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+SENDFILE_BACKEND = 'sendfile.backends.development'
+PRIVATE_MEDIA_REDIRECT_HEADER = 'X-Accel-Redirect'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            }
+}
+
+# Mandrill config
+MANDRILL_API_KEY = "z2O_vfFUJB4L2yeF4Be9Tg" # this is a test key replace wit ha different one in production
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False

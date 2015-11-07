@@ -12,5 +12,9 @@ textblob
 psycopg2
 nltk
 boto==2.1.1
+django-dbbackup
 cognitiveatlas
 dropbox
+kombu
+opbeat
+djrill

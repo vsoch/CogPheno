@@ -1,0 +1,10 @@
+#import os
+#DEBUG = True
+#TEMPLATE_DEBUG = True
+
+DOMAIN_NAME="http://127.0.0.1"
+
+#CSRF_COOKIE_SECURE = False
+#SESSION_COOKIE_SECURE = False
+
+
